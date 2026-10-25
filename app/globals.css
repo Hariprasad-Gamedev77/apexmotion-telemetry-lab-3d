@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --apex-bg: #F8FAFC;
+    --apex-bg-secondary: #F1F5F9;
+    --apex-panel: #FFFFFF;
+    --apex-panel-hover: #F8FAFC;
+    --apex-border: #E2E8F0;
+    --apex-border-bright: #CBD5E1;
+    --apex-text: #0F172A;
+    --apex-text-secondary: #475569;
+    --apex-text-muted: #94A3B8;
+    --apex-cyan: #0284C7;
+    --apex-green: #10B981;
+    --apex-red: #EF4444;
+    --apex-amber: #F59E0B;
+    --apex-violet: #8B5CF6;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    background-color: var(--apex-bg);
+    color: var(--apex-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color-scheme: light;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom scrollbars for clean light workstation */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Tabular numbers for telemetry accuracy */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle light grid background */
+.bg-grid-pattern {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
