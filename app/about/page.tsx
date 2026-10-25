@@ -45,7 +45,7 @@ export default function AboutPage() {
             <h3 className="font-mono font-bold text-sm">1. Binary Packet Decoding & Networking</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            The Python backend listens for raw UDP datagrams on loopback port 20777 with an OS-level <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">SO_RCVBUF</code> socket buffer. Packets are parsed using Python's standard-library <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">struct.unpack_from</code> with little-endian format strings (<code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;BBIf</code> header, <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;Hff</code> telemetry). Bounded asynchronous queues protect against memory growth during UI lag.
+            The Python backend listens for raw UDP datagrams on loopback port 20777 with an OS-level <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">SO_RCVBUF</code> socket buffer. Packets are parsed using Python&apos;s standard-library <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">struct.unpack_from</code> with little-endian format strings (<code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;BBIf</code> header, <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;Hff</code> telemetry). Bounded asynchronous queues protect against memory growth during UI lag.
           </p>
         </div>
 

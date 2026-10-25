@@ -20,6 +20,7 @@ export function CameraController({
   targetHeading,
 }: CameraControllerProps) {
   const { camera } = useThree();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null);
   const currentPos = useRef(new THREE.Vector3(...targetPosition));
   const currentLookAt = useRef(new THREE.Vector3(...targetPosition));

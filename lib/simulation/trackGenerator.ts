@@ -130,8 +130,8 @@ function buildCircuitFromControlPoints(
     const curvature = Math.abs(dHeading) / (distDelta + 1e-4);
 
     const maxLatG = 3.8 * 9.81;
-    let speedLimitMs = Math.sqrt(maxLatG / Math.max(curvature, 0.001));
-    let speedLimitKph = Math.min(345, Math.max(78, speedLimitMs * 3.6));
+    const speedLimitMs = Math.sqrt(maxLatG / Math.max(curvature, 0.001));
+    const speedLimitKph = Math.min(345, Math.max(78, speedLimitMs * 3.6));
 
     const dist = distances[i];
     let sector: 1 | 2 | 3 = 1;

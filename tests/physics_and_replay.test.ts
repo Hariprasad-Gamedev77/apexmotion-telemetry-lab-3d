@@ -15,8 +15,8 @@ export function runMathematicsTests() {
     } else {
       results.push({ name: 'Track Generator Spline Interpolation', passed: false, message: `Invalid track length (${circuit.lengthMeters}m) or waypoints (${circuit.waypoints.length})` });
     }
-  } catch (e: any) {
-    results.push({ name: 'Track Generator Spline Interpolation', passed: false, message: e.message });
+  } catch (e: unknown) {
+    results.push({ name: 'Track Generator Spline Interpolation', passed: false, message: String(e) });
   }
 
   // Test 2: Bounding Box Computation
@@ -28,8 +28,8 @@ export function runMathematicsTests() {
     } else {
       results.push({ name: 'Bounding Box & Coordinate Transformation', passed: false, message: 'Incorrect span' });
     }
-  } catch (e: any) {
-    results.push({ name: 'Bounding Box & Coordinate Transformation', passed: false, message: e.message });
+  } catch (e: unknown) {
+    results.push({ name: 'Bounding Box & Coordinate Transformation', passed: false, message: String(e) });
   }
 
   // Test 3: Formatting Functions
@@ -43,8 +43,8 @@ export function runMathematicsTests() {
     } else {
       results.push({ name: 'Time & Delta Formatting Sign Conventions', passed: false, message: `Got lap=${lapStr}, delta=${deltaStr}` });
     }
-  } catch (e: any) {
-    results.push({ name: 'Time & Delta Formatting Sign Conventions', passed: false, message: e.message });
+  } catch (e: unknown) {
+    results.push({ name: 'Time & Delta Formatting Sign Conventions', passed: false, message: String(e) });
   }
 
   // Test 4: Longitudinal Vehicle Dynamics Step
@@ -59,8 +59,8 @@ export function runMathematicsTests() {
     } else {
       results.push({ name: 'Longitudinal Vehicle Dynamics & RPM Step', passed: false, message: `Invalid sample speed=${sample.speedKph}` });
     }
-  } catch (e: any) {
-    results.push({ name: 'Longitudinal Vehicle Dynamics & RPM Step', passed: false, message: e.message });
+  } catch (e: unknown) {
+    results.push({ name: 'Longitudinal Vehicle Dynamics & RPM Step', passed: false, message: String(e) });
   }
 
   return results;

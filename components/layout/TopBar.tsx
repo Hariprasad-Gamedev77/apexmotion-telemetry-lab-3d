@@ -6,7 +6,7 @@
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApexStore } from '@/lib/store';
-import { DATA_MODES } from '@/lib/constants';
+import { DATA_MODES, type DataMode } from '@/lib/constants';
 import { Sparkles, Database, Wifi, MapPin } from 'lucide-react';
 
 export function TopBar() {
@@ -14,8 +14,8 @@ export function TopBar() {
   const pathname = usePathname();
   const { dataMode, setDataMode, activeSession, wsConnected, switchCircuit } = useApexStore();
 
-  const handleModeSwitch = (mode: string) => {
-    setDataMode(mode as any);
+  const handleModeSwitch = (mode: DataMode) => {
+    setDataMode(mode);
     if (mode === DATA_MODES.SYNTHETIC) {
       switchCircuit('singapore');
       if (pathname !== '/dashboard') router.push('/dashboard');

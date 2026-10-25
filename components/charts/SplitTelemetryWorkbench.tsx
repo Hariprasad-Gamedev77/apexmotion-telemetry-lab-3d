@@ -23,18 +23,16 @@ interface SplitTelemetryWorkbenchProps {
   compact?: boolean;
 }
 
-export function SplitTelemetryWorkbench({ compact = false }: SplitTelemetryWorkbenchProps) {
+export function SplitTelemetryWorkbench() {
   const {
     telemetryHistory,
     currentTelemetry,
     seekToDistance,
     setCurrentTime,
-    duration,
-    circuit,
   } = useApexStore();
 
   const [alignBy, setAlignBy] = useState<'distance' | 'time'>('distance');
-  const [showGForces, setShowGForces] = useState<boolean>(true);
+  const showGForces = true;
 
   // Sample data smoothly for 60fps charting
   const chartData = useMemo(() => {
@@ -63,8 +61,9 @@ export function SplitTelemetryWorkbench({ compact = false }: SplitTelemetryWorkb
   const currentX = alignBy === 'distance' ? currentTelemetry.distanceMeters : currentTelemetry.timestamp;
 
   // Handle click on any chart to seek replay & 3D vehicle
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChartClick = (e: any) => {
-    if (e && e.activePayload && e.activePayload.length > 0) {
+    if (e && e.activePayload && e.activePayload.length > 0 && e.activePayload[0].payload) {
       const payload = e.activePayload[0].payload;
       if (alignBy === 'distance' && payload.distance !== undefined) {
         seekToDistance(payload.distance);

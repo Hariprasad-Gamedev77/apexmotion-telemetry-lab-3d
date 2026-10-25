@@ -81,8 +81,9 @@ export function SynchronizedTelemetryChart({ height = 240 }: SynchronizedTelemet
           <LineChart
             data={chartData}
             margin={{ top: 8, right: 12, left: -16, bottom: 0 }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onClick={(e: any) => {
-              if (e && e.activePayload && e.activePayload.length > 0) {
+              if (e && e.activePayload && e.activePayload.length > 0 && e.activePayload[0].payload) {
                 const clickedTime = e.activePayload[0].payload.time;
                 if (clickedTime !== undefined) setCurrentTime(clickedTime);
               }

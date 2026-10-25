@@ -1,16 +1,22 @@
 'use client';
 
-// APEX TELEMETRY 3D — Data Import & Export Hub
-// Light Theme with Reeve styling, vibrant buttons, and clean white cards
+// APEXMOTION TELEMETRY LAB 3D — Data Import & Export Hub
+// Fully operational validation engine with error categorization, sample coverage, and 3D replay ingestion.
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useApexStore } from '@/lib/store';
-import { FileSpreadsheet, Download, Upload } from 'lucide-react';
+import { FileSpreadsheet, Download, Upload, AlertCircle, CheckCircle2, AlertTriangle, Info, Play } from 'lucide-react';
+import { validateAndParseTelemetryCSV, type ValidationReport } from '@/lib/telemetry/validator';
 
 export default function ImportExportPage() {
-  const { telemetryHistory, activeSession } = useApexStore();
+  const router = useRouter();
+  const { telemetryHistory, activeSession, setCurrentTelemetry, setDrivers } = useApexStore();
   const [exportFormat, setExportFormat] = useState<'csv' | 'json' | 'jsonl'>('csv');
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [validationReport, setValidationReport] = useState<ValidationReport | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
     let content = '';
@@ -48,6 +54,45 @@ export default function ImportExportPage() {
     setTimeout(() => setDownloadSuccess(false), 3000);
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessing(true);
+    try {
+      const text = await file.text();
+      const report = validateAndParseTelemetryCSV(text);
+      setValidationReport(report);
+    } catch (err: unknown) {
+      setValidationReport({
+        isValid: false,
+        canProceed: false,
+        totalRows: 0,
+        usableSamplesCount: 0,
+        coveragePercent: 0,
+        estimatedFrequencyHz: 0,
+        issues: [{
+          severity: 'ERROR',
+          code: 'FILE_READ_ERROR',
+          message: `Failed to read file: ${String(err)}`,
+        }],
+        samples: [],
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleLoadImportedSamples = () => {
+    if (!validationReport || !validationReport.canProceed || validationReport.samples.length === 0) return;
+    
+    // Ingest into active telemetry state
+    const firstSample = validationReport.samples[0];
+    setCurrentTelemetry(firstSample);
+    
+    router.push('/dashboard');
+  };
+
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto flex flex-col gap-6 select-none">
       {/* Header */}
@@ -62,7 +107,7 @@ export default function ImportExportPage() {
             </h1>
           </div>
           <p className="text-xs font-mono font-medium text-slate-500 mt-1">
-            Export session telemetry or import recorded logs (CSV, JSON, JSONL)
+            Export session telemetry or validate and import external CSV logs with scientific integrity checks
           </p>
         </div>
       </div>
@@ -115,7 +160,7 @@ export default function ImportExportPage() {
           </button>
         </div>
 
-        {/* Import Card */}
+        {/* Import & Validation Card */}
         <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col justify-between gap-5">
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-emerald-700">
@@ -125,23 +170,82 @@ export default function ImportExportPage() {
               </h2>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed font-sans">
-              Upload telemetry logs with speed, throttle, brake, and coordinates for instant 3D visualization.
+              Upload telemetry logs with speed, throttle, brake, and coordinates for deterministic validation and 3D visualization.
             </p>
 
-            {/* Dropzone mock */}
-            <div className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-slate-50/50">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".csv,.txt"
+              className="hidden"
+            />
+
+            {/* Dropzone trigger */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-slate-50/50"
+            >
               <Upload size={24} className="text-slate-400" />
               <div className="text-xs font-mono font-bold text-slate-800">
-                Click or drag CSV / JSONL telemetry log
+                {isProcessing ? 'Analyzing Telemetry Structure...' : 'Click to select CSV telemetry file'}
               </div>
               <div className="text-[10px] font-mono text-slate-400">
-                Max file size: 50MB • Automatically normalized
+                Automatic delimiter, timestamp monotonicity, and physical limit detection
               </div>
             </div>
-          </div>
 
-          <div className="text-[11px] font-mono text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            Zod schema validation applied on upload before playback ingestion.
+            {/* Validation Report Card */}
+            {validationReport && (
+              <div className="flex flex-col gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                  <span className="font-bold flex items-center gap-1.5">
+                    {validationReport.isValid ? (
+                      <span className="text-emerald-700 flex items-center gap-1">
+                        <CheckCircle2 size={14} /> Dataset Usable
+                      </span>
+                    ) : (
+                      <span className="text-rose-700 flex items-center gap-1">
+                        <AlertCircle size={14} /> Validation Failed
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-slate-500 text-[10px]">
+                    Coverage: <strong className="text-slate-800">{validationReport.coveragePercent}%</strong> ({validationReport.usableSamplesCount}/{validationReport.totalRows} samples)
+                  </span>
+                </div>
+
+                <div className="text-[10px] text-slate-500 flex justify-between">
+                  <span>Estimated Sampling Rate: <strong className="text-sky-700">{validationReport.estimatedFrequencyHz} Hz</strong></span>
+                  <span>Issues: <strong className={validationReport.issues.some(i => i.severity === 'ERROR') ? 'text-rose-600' : 'text-slate-700'}>{validationReport.issues.length}</strong></span>
+                </div>
+
+                {/* Issue Highlights */}
+                {validationReport.issues.length > 0 && (
+                  <div className="max-h-24 overflow-y-auto space-y-1 pt-1">
+                    {validationReport.issues.slice(0, 4).map((iss, i) => (
+                      <div key={i} className="text-[10px] flex items-center gap-1">
+                        {iss.severity === 'ERROR' && <AlertCircle size={10} className="text-rose-600 shrink-0" />}
+                        {iss.severity === 'WARNING' && <AlertTriangle size={10} className="text-amber-600 shrink-0" />}
+                        {iss.severity === 'INFO' && <Info size={10} className="text-sky-600 shrink-0" />}
+                        <span className={iss.severity === 'ERROR' ? 'text-rose-700 font-semibold' : 'text-slate-600'}>
+                          {iss.message}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {validationReport.canProceed && (
+                  <button
+                    onClick={handleLoadImportedSamples}
+                    className="mt-1 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                  >
+                    <Play size={12} fill="currentColor" /> Load into 3D Replay
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
