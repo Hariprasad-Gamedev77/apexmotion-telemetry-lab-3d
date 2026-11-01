@@ -1,4 +1,7 @@
 # APEXMOTION TELEMETRY LAB 3D — BASELINE QA AUDIT REPORT
+
+> Historical report from 2026-10-25. Its implementation and verification claims are superseded by [QA_FINAL_REPORT.md](QA_FINAL_REPORT.md), which records the 2026-11-01 source audit and actual commands run.
+
 **Document Version:** 1.0.0  
 **Audit Date:** 2026-10-25T22:58:00+05:30  
 **Target Repository:** `https://github.com/Hariprasad-Gamedev77/apexmotion-telemetry-lab-3d`  

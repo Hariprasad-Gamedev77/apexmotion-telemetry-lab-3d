@@ -1,171 +1,112 @@
-# APEX TELEMETRY 3D — MASTER FUNCTIONAL QA, BUG FIXING & RELIABILITY AUDIT REPORT
+# APEX TELEMETRY 3D — Audit and QA Report
 
-**Project:** ApexMotion Telemetry Lab 3D  
-**Live Production URL:** https://apexmotion-telemetry-lab-3d.vercel.app/  
-**GitHub Repository:** https://github.com/Hariprasad-Gamedev77/apexmotion-telemetry-lab-3d  
-**Local Workspace:** `C:\Users\harip\.gemini\antigravity\scratch\apex-telemetry-3d`  
-**Audit Completion Date:** October 25, 2026  
-**Auditor:** Principal Software Architect & QA Automation Specialist  
+**Audit date:** 2026-11-01
 
----
+**Scope:** Repository source review, static route inventory, baseline commands, and targeted fixes.
 
-## SECTION A — EXECUTIVE SUMMARY
+**Production deployment:** Not changed.
 
-An exhaustive functional QA, numerical validation, and engineering reliability audit of **ApexMotion Telemetry Lab 3D** has been executed. The platform was evaluated against rigorous motorsport engineering standards (inspired by MoTeC i2, McLaren ATLAS, and Formula Telemetry), mathematical determinism, and real-time simulator networking protocols.
+## Summary
 
-### Key Headline Metrics:
-* **Frontend TypeScript & Math Verification:** **21 / 21 tests passed (100%)** in 1.4s.
-* **Python Telemetry Collector Verification:** **6 / 6 tests passed (100%)** in 0.58s.
-* **Next.js Production Build:** **21 / 21 static routes prerendered cleanly** with zero TypeScript errors.
-* **Local Development Server:** Running healthy on `http://localhost:3000` (HTTP 200 OK on all routes).
-* **Documentation Architecture:** 8 formal engineering specification documents generated in `docs/`.
-* **Zero Silent Fallback / Zero Silent Repair Policy:** Fully enforced across all ingestion and comparison modules.
+The project is a Next.js 16 App Router frontend with Zustand state, Three.js/React Three Fiber visuals, Recharts charts, a TypeScript calculation layer, and a Python FastAPI UDP/WebSocket collector. It has 24 application routes plus the home and not-found routes. The prominent end-to-end historical telemetry replay and commercial simulator ingestion claims were not supported by the inspected implementation.
 
----
+The baseline and post-change production builds generated all 26 routes. The sandboxed TypeScript test attempt initially failed in `tsx` while calling `os.userInfo()` with `uv_os_get_passwd returned ENOMEM`; rerunning with external runtime access executed the suite successfully (32/32). Python and the `py` launcher are unavailable, so collector tests were not run. No browser automation, responsive visual review, live API request, or physical simulator test was available.
 
-## SECTION B — VERIFIED WORKING FEATURES
+## Architecture and source inventory
 
-| Feature / Subsystem | Verification Method | Status | Engineering Observation |
-| :--- | :--- | :--- | :--- |
-| **Synthetic 3D Simulation Mode** | Three.js R3F Canvas + Euler Kinematics | **VERIFIED** | Real-time vehicle physics ($798\text{kg}$ mass, quadratic aero drag, DRS flap) simulated deterministically over closed Catmull-Rom splines. |
-| **Formula Telemetry Analytics Suite** | Dynamic Singapore GP Tabbed Suite | **VERIFIED** | 6 dedicated views: Split Traces, Lap Analysis (62 laps, S1/S2/S3), Race Progression (gap to leader), Strategy (tyre stints), Pit Stops (box stationary times), and Track Visualization (19 turns). |
-| **Split Telemetry Workbench** | Recharts Synchronized Multi-Pane | **VERIFIED** | Individual synchronized panes for Speed, Throttle, Brake, Gear, and Engine RPM. Distance ($m$) and Time ($s$) horizontal axis toggle. |
-| **Collapsible Live Telemetry HUD** | `<Minimize2>` / `<Maximize2>` HUD Pill | **VERIFIED** | Collapses to a compact 36px horizontal pill, resolving all layout occlusion with 3D canvas and bottom charts. |
-| **Operating Mode Navigation** | High-Contrast TopBar Mode Switcher | **VERIFIED** | Real-time routing between `/dashboard` (Synthetic), `/historical` (OpenF1), and `/connection` (Live Sim) with active visual states. |
-| **Scientific CSV Telemetry Ingestion** | `lib/telemetry/validator.ts` | **VERIFIED** | Auto-detects comma and semicolon delimiters, validates physical boundaries, enforces monotonic timestamps, and rejects non-finite values. |
-| **MoTeC-Grade Lap Comparison Engine** | `lib/analysis/lapComparison.ts` | **VERIFIED** | Resamples telemetry onto uniform spatial grid ($\Delta s = 1.0\text{m}$), applies gap protection ($>150\text{m}$), and computes cumulative time deltas ($\Delta t$). |
-| **Daylight Light-Theme Visual System** | Slate / Emerald / Sky Design Tokens | **VERIFIED** | High-contrast light UI (`bg-white/95 border-slate-200`) with legible typography and zero dark-theme clashing. |
-| **Next.js Developer Indicators** | `next.config.ts` | **VERIFIED** | `devIndicators: false` configured; eliminated Next.js "N" badge from bottom-left corner. |
+- **Framework:** Next.js 16.4.3 App Router, React 19.3, TypeScript, Tailwind v4.
+- **Frontend state and UI:** Zustand; Three.js/React Three Fiber; Recharts; Lucide; Motion.
+- **Historical provider:** direct OpenF1 REST adapter in `lib/api/openf1.ts`; no second provider adapter or FastF1 implementation.
+- **Collector:** Python FastAPI, UDP receiver, educational `struct` decoder, JSON WebSocket broadcaster, JSONL/CSV recorder.
+- **Tests:** custom `tsx` runner under `tests/`; pytest suite under `python-collector/tests/`.
+- **Routes:** `/`, `/about`, `/circuits`, `/comparison`, `/connection`, `/dashboard`, `/data`, `/diagnostics`, `/drivers`, `/explore`, `/historical`, `/history`, `/laps`, `/packets`, `/pit-stops`, `/progression`, `/replay`, `/stats`, `/strategy`, `/telemetry`, `/timing`, `/track-map`, `/tyres`, and Next's not-found route.
+- **Files read in detail:** `AGENTS.md`, `package.json`, `README.md`; `app/layout.tsx`, `app/page.tsx`, and route files for about, circuits, comparison, connection, dashboard, data, diagnostics, drivers, explore, historical, history, laps, packets, pit stops, progression, replay, stats, strategy, telemetry, timing, and tyres; `components/layout/Sidebar.tsx`, `components/layout/TopBar.tsx`, `components/charts/FormulaTelemetrySuite.tsx`; `lib/types.ts`, `lib/store.ts`, `lib/api/openf1.ts`, `lib/circuits/registry.ts`, `lib/telemetry/validator.ts`, `lib/analysis/lapComparison.ts`, `lib/simulation/trackGenerator.ts`, `lib/simulation/vehiclePhysics.ts`; Python collector protocol, receiver, broadcaster, normalizer, models and entry point; the TypeScript test runner and test files; and the QA/provenance/schema/methods/test-plan docs. All app route filenames were inventoried with `rg --files`; visual/browser findings remain unverified. The inventory excluded generated `node_modules` and `.git`.
 
----
+## Page-by-page audit
 
-## SECTION C — CONFIRMED DEFECTS & RESOLUTIONS
+“Static review” means source inspection only. None of the pages below received browser interaction or responsive visual verification in this run.
 
-| Issue ID | Module | Root Cause | Solution Applied | Regression Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **DEF-001** | UI Overlay | Next.js 16 dev tool indicator active by default. | Added `devIndicators: false` to `next.config.ts`. | **Resolved & Verified** |
-| **DEF-002** | TopBar | Mode buttons lacked click handlers and state switching. | Wired `handleModeSwitch` with active router paths. | **Resolved & Verified** |
-| **DEF-003** | HUD Layout | Dashboard HUD card obscured top half of bottom charts. | Implemented collapsible 36px minimal pill toggle. | **Resolved & Verified** |
-| **DEF-004** | Theme Styling | Replay controls retained legacy dark background `#080A0D`. | Migrated to daylight theme (`bg-white/95 border-slate-200`). | **Resolved & Verified** |
-| **DEF-005** | Lap Comparison | Comparison Test C fixture had a 300m spatial gap exceeding 150m. | Corrected fixture spatial sampling to 0, 100, 200, 300m. | **Resolved & Verified** |
-| **DEF-006** | Next.js Build | Recharts v3 `CategoricalChartFunc` type mismatch & missing `DataMode` import. | Typed event handlers safely; exported `DataMode` type in constants. | **Resolved & Verified** |
-| **DEF-007** | Camera System | Three.js `OrbitControls` ref typing mismatch in React Three Fiber. | Typed ref safely with proper damping and lookAt updates. | **Resolved & Verified** |
+| Page | Existing functionality | Confirmed problems | Required fix | Test performed | Status |
+|---|---|---|---|---|---|
+| Home `/` | Mode launcher and product summary | Advertised real GPS and F1 packet compatibility without support | Corrected descriptions and rate claims | Source review; production build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Dashboard `/dashboard` | Synthetic 3D scene, HUD, charts, controls | Historical selection could leave procedural telemetry looking historical | Historical mode now shows metadata-only and illustrative-geometry notice; historical store data cleared | Source review; production build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Live Timing `/timing` | Timing tower view | No live data binding verified; empty state is present | Connect a real source and browser-check empty/disconnected states | Source review; build passed | UNVERIFIED |
+| Track Map `/track-map` | 2D circuit view | Geometry provenance/accuracy not externally verified | Cite source and mark illustrative geometry | Not run | UNVERIFIED |
+| Vehicle Telemetry `/telemetry` | HUD view | Source behavior not browser-verified | Validate with actual selected dataset | Not run | UNVERIFIED |
+| Telemetry Explorer `/explore` | Formula/chart explorer | Shared chart suite includes generated fixtures | Fixture values are labeled as synthetic examples | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Lap Analysis `/laps` | Lap analysis view | Data identity and metric source not verified | Bind to validated selected lap data | Not run | UNVERIFIED |
+| Lap Comparison `/comparison` | Comparison charts | Hard-coded lap times and fallback delta disagreed; comparison speed was perturbed synthetic data; delta used an incorrect fixed distance increment | Replaced displayed times/delta with calculations from the shown synthetic comparison and labelled it as a fixture | New known-answer tests passed; production build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Driver Comparison `/drivers` | Driver comparison view | Reference values are not validated against a session | Marked as static reference fixtures with source caveat | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Tyres & Stints `/tyres` | Compound/stint display | Used synthetic grid compounds and unsupported precise degradation claims | Labeled demo values; removed degradation rates and measured-data implication | Source review; production build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Track Replay `/replay` | Replay controls and 3D view | Historical position synchronization is not implemented | Shows source notice that position telemetry is not subscribed | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Session History `/history` | Curated session catalogue | “Open Replay” navigated to the synthetic dashboard | Now links to provider session browser and labels entries as catalogue references | Source review | IMPLEMENTED, NOT FULLY TESTED |
+| Historical Explorer `/historical` | OpenF1 meeting/session browser | Empty provider responses were replaced with curated sessions | Removed fixture substitution and added empty/error notices | Source review; no live API test | IMPLEMENTED, NOT FULLY TESTED |
+| Import & Export `/data` | CSV parsing and export | Imported sample load currently sets only the current sample; channel defaults remain placeholders | Validator now discloses absent channels, retains out-of-range values and rejects numeric-prefix parsing; complete import replay remains incomplete | Added cases passed in 32-test suite; production build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Packet Inspector `/packets` | Fixture protocol description and counters | Displayed a fixed 60 Hz target and implied a bound/live receiver | Clarified educational fixture, unconnected metrics, unknown source rate and idle state | Source review | IMPLEMENTED, NOT FULLY TESTED |
+| Connection Setup `/connection` | WebSocket connection UI | Button marked connected after a timer without opening a socket; instructions implied simulator compatibility | Uses real browser WebSocket events and identifies fixture-only protocol | Source review; production build passed; no collector available | IMPLEMENTED, NOT FULLY TESTED |
+| Diagnostics `/diagnostics` | Diagnostic cards | FPS, GPU, buffer and packet counters were fabricated constants | Removed fabricated initial packet counters; replaced uninstrumented FPS with “Not measured” | Source review; production build passed | IMPLEMENTED, NOT FULLY TESTED |
+| Circuit Explorer `/circuits` | Circuit catalogue and illustrative geometry controls | Catalogue/geometry source and layout quality are unverified | Marked unverified; launched session uses synthetic metadata | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| `/pit-stops` | Pit stop chart/table | Values are fixture examples, not event-scoped provider records | Generic demo identity and fixture label added | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| `/progression` | Race progress chart | Data is generated, not provider session data | Generic demo identities and synthetic fixture label added | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| `/stats` | Championship statistics | Season values are static and source is unverified | Reference fixture/source caveat added | Source review; build passed | IMPLEMENTED, NOT FULLY TESTED |
+| `/strategy` | Tyre strategy bars | Static Austin fixture was called real selected-session data | Explicitly labeled as illustrative demo fixture | Source review | IMPLEMENTED, NOT FULLY TESTED |
+| `/about` | Architecture documentation | Claimed full simulator ingestion, provenance separation, and historical replay | Updated collector, physics, and history limitations | Source review | IMPLEMENTED, NOT FULLY TESTED |
+| Not found | Next.js fallback | Browser behavior not reviewed | Verify route handling in browser | Build prerender only | UNVERIFIED |
 
----
+## Confirmed bugs and fixes
 
-## SECTION D — UNVERIFIED FEATURES, BLOCKED ITEMS & OPERATIONAL RISKS
+| Finding | Fix | Status |
+|---|---|---|
+| Historical API failures returned curated records as if fetched | Meeting, session and driver fetches return empty results; historical UI no longer swaps in fixture sessions | IMPLEMENTED, NOT FULLY TESTED |
+| API session metadata invented 56/25 lap counts, 5400 m circuit length, generic driver roster and complete channel coverage | Unknown lap count/length are 0; driver and channel coverage starts empty/false unless available from retrieved data | IMPLEMENTED, NOT FULLY TESTED |
+| Historical driver roster was converted to invented positions, gaps, lap, speed and medium tyres | Historical load clears synthetic cars and telemetry history; dashboard identifies metadata-only state | IMPLEMENTED, NOT FULLY TESTED |
+| Lap comparison UI displayed two fixed lap times and unrelated fallback delta | UI now derives the shown reference duration and generated-comparison delta from chart samples | IMPLEMENTED, NOT FULLY TESTED |
+| Core comparison integrated a constant grid width and returned a delta across skipped regions | It validates ordered finite inputs, appends the final partial grid endpoint, uses trapezoidal reciprocal-speed integration over actual valid distance and reports excluded coverage | IMPLEMENTED, NOT FULLY TESTED |
+| CSV `parseFloat` accepted values such as `200kmh`; absent channels silently received plausible defaults; pedal values were clipped | Strict numeric parsing, per-sample missing-value findings, explicit warnings for placeholder channels, and retention/reporting of out-of-range values | IMPLEMENTED, NOT FULLY TESTED |
+| Simulator substituted guessed DRS ranges when a circuit had no DRS zones; timestep was unchecked | Missing zones now mean DRS unavailable; timestep must be finite and in `(0, 0.25]` seconds | IMPLEMENTED, NOT FULLY TESTED |
+| Connection button reported connected on a timeout without a socket | It now reflects WebSocket open/error/close events and closes the connection on unmount | IMPLEMENTED, NOT FULLY TESTED |
+| Hardcoded packet metrics and unsupported 60 Hz/live protocol statements | Initial diagnostics are idle/zero; packet and homepage copy now identifies an educational format and does not claim F1 compatibility or a fixed rate | IMPLEMENTED, NOT FULLY TESTED |
+| Static tyre degradation rates and strategy fixture appeared to be measured selected-session information | Replaced by clear demo wording and removed numerical degradation claims | IMPLEMENTED, NOT FULLY TESTED |
 
-### 1. Hardware-Blocked Items
-* **BLK-001: Physical Sim UDP Datagram Stream**: Direct network validation against EA Sports F1 23/24 running on external console/PC is **BLOCKED (Requires Physical Simulator Host)** due to containerized/cloud execution environment. *Mitigated by 6 automated bit-for-bit packet decoding tests and `mock_sender.py`.*
-* **BLK-002: Live OpenF1 Grand Prix In-Session Stream**: Live in-race streaming is **BLOCKED (Requires Active Grand Prix Weekend)** as FIA sessions only broadcast during race weekends. *Mitigated by comprehensive Singapore GP 2026 offline dataset fixture.*
+## Test and build evidence
 
-### 2. Operational Risks & Mitigations
-* **Memory Bounds (>100k samples)**: Addressed via CSV ingestion validation warnings and downsampling heuristics.
-* **Background Tab Throttling**: Addressed via delta time clamping (`Math.min(dt, 0.1)`) preventing replay clock jumps.
-* **WebGL Context Loss**: Addressed via error boundary around Three.js Canvas.
+| Command | Actual outcome |
+|---|---|
+| `npm.cmd run build` (before edits) | **Passed.** Next.js 16.4.3 compiled, TypeScript completed, and all 26 routes prerendered. |
+| `npm.cmd test` (before edits, first attempt) | **Did not run tests.** `tsx` crashed during initialization: `uv_os_get_passwd returned ENOMEM` in `node:os.userInfo`. |
+| `npm.cmd test` (retry, before edits) | **Did not run tests.** Same runtime initialization failure. |
+| `npm test` | PowerShell blocked `npm.ps1` under execution policy; no tests ran. |
+| `python -m pytest tests/` | Python executable is unavailable. |
+| `py -m pytest tests/` | Python launcher is unavailable. |
+| `npm.cmd test` (post-change, with external runtime access) | **Passed: 32 executed, 32 passed, 0 failed.** Includes new validator, timestep and comparison cases. |
+| `npm.cmd run build` (post-change) | **Passed.** TypeScript completed and all 26 routes prerendered. |
+| `npm.cmd run lint` | Started but produced no output and was interrupted; lint status is UNVERIFIED. |
 
----
+The post-change TypeScript suite and production build passed. The Python collector suite and lint remain unverified.
 
-## SECTION E — TEST EXECUTION SUMMARY
+## Feature status
 
-```
-================================================================
-   APEXMOTION TELEMETRY LAB 3D — SCIENTIFIC VERIFICATION SUITE   
-================================================================
+- **Synthetic mode:** IMPLEMENTED, NOT FULLY TESTED. The simplified longitudinal model omits calibrated vehicle maps, tyre/load sensitivity, suspension, fuel burn, drivetrain details, and other real-car effects.
+- **Historical metadata browser:** IMPLEMENTED, NOT FULLY TESTED. OpenF1 records are provider data when returned; network failure produces empty state. Complete telemetry acquisition and historical GPS replay are NOT IMPLEMENTED.
+- **Live simulator mode:** NEEDS EXTERNAL DATA OR HARDWARE. Current collector decodes an educational fixture protocol; commercial F1 simulator adapter, browser telemetry subscription, freshness/sequence tracking and measured packet loss display are NOT IMPLEMENTED.
+- **CSV validation:** IMPLEMENTED, NOT FULLY TESTED. It still outputs placeholder values for absent optional channels (now disclosed); original file bytes/rows are not retained alongside processed samples.
+- **Lap comparison engine:** IMPLEMENTED, NOT FULLY TESTED. It is not wired to actual lap selection in the visible `/comparison` UI; current UI explicitly shows a synthetic derived example.
+- **3D historical replay:** NOT IMPLEMENTED. Historical location fetch is not wired into the replay route; current metadata-only notice is explicit.
+- **Trust Passport, Validation Bench, complete Circuit Explorer/Driver Universe and source-specific dataset envelopes:** NOT IMPLEMENTED.
 
-▶ Suite 1: Core Mathematics & Spline Interpolation
-    ✓ PASS: Track Generator Spline Interpolation
-    ✓ PASS: Bounding Box & Coordinate Transformation
-    ✓ PASS: Time & Delta Formatting Sign Conventions
-    ✓ PASS: Longitudinal Vehicle Dynamics & RPM Step
+## Limitations and external dependencies
 
-▶ Suite 2: Phase Three — Telemetry Data Validation & Edge Cases
-    ✓ PASS: Validation: Clean Valid CSV Ingestion
-    ✓ PASS: Validation: Empty File Rejection
-    ✓ PASS: Validation: Missing Mandatory Channel Detection
-    ✓ PASS: Validation: Non-Monotonic Timestamp Fatal Error
-    ✓ PASS: Validation: NaN & Infinity Floating Point Protection
-    ✓ PASS: Validation: Sampling Gap Detection (>1.0s)
-    ✓ PASS: Validation: Semicolon Delimiter Auto-Detection
+- The provided Vercel site URL was inaccessible through the available web inspection tool. Production behavior is UNVERIFIED.
+- No browser runtime was available for console/network inspection, control testing, keyboard checks, or desktop/tablet/mobile screenshots.
+- OpenF1 is a third-party data provider, not an official F1 service. Provider coverage, API availability and usage terms must be checked against the provider before production use.
+- No simulator host or running collector was available. Physical UDP handling, reconnect behavior, packet order/loss and true source frequency are UNVERIFIED.
+- Circuit layouts, turn coordinates, geometry, historical accuracy and the static catalogue's external source claims were not independently verified during this run.
 
-▶ Suite 3: Phase Six — Lap Alignment & Known-Answer Comparisons
-    ✓ PASS: Comparison Test A: Identical Data Zero Delta
-    ✓ PASS: Comparison Test B: Constant Offset Verification
-    ✓ PASS: Comparison Test C: Incomplete Overlap Bounding
-    ✓ PASS: Comparison Test D: Large Gap (>150m) Prohibited Interpolation
-    ✓ PASS: Comparison Test E: Insufficient Samples (<2) Rejection
+## Recommended next priorities
 
-▶ Suite 4: Phase Seven — Longitudinal Dynamics & Dimensional Physics
-    ✓ PASS: Physics Test 1: F_net = m * a Dimensional Verification
-    ✓ PASS: Physics Test 2: Mass Proportionality (Doubling Mass Halves Accel)
-    ✓ PASS: Physics Test 3: Quadratic Aero Drag Scaling (F_aero proportional to v^2)
-    ✓ PASS: Physics Test 4: DRS Flap 26% Drag Reduction Effect
-    ✓ PASS: Physics Test 5: Semi-Implicit Euler Kinematic Integration
-
-----------------------------------------------------------------
-TOTAL EXECUTED: 21 | PASSED: 21 | FAILED: 0 | DURATION: 1.4s
-ALL VERIFICATION & RELIABILITY TEST SUITES PASSED DETERMINISTICALLY.
-================================================================
-```
-
-### Python UDP Collector Suite (`pytest -v`):
-```
-tests/test_packet_decoder.py::test_valid_telemetry_packet_unpacking PASSED [ 16%]
-tests/test_packet_decoder.py::test_valid_lap_packet_unpacking PASSED     [ 33%]
-tests/test_packet_decoder.py::test_short_truncated_packet_rejection PASSED [ 50%]
-tests/test_packet_decoder.py::test_nan_float_rejection PASSED            [ 66%]
-tests/test_packet_decoder.py::test_unknown_packet_id PASSED              [ 83%]
-tests/test_packet_decoder.py::test_telemetry_normalizer_envelope PASSED  [100%]
-============================== 6 passed in 0.58s ==============================
-```
-
----
-
-## SECTION F — NUMERICAL VALIDATION REPORT
-
-1. **Analytical Constant Offset Verification (Test B)**:
-   * Theoretical ground truth: Reference at $50\text{ m/s}$, Comparison at $40\text{ m/s}$ over $1,000\text{ m}$.
-   $$\Delta t = \frac{1000}{40} - \frac{1000}{50} = 25.0 - 20.0 = +5.0000\text{ s}$$
-   * Numerical calculation result: $+5.0000\text{ s}$ ($|\text{error}| < 10^{-4}\text{ s}$).
-2. **Quadratic Aerodynamic Drag Scaling (Physics Test 3)**:
-   * Theoretical scaling: Drag force scales strictly with $v^2$.
-   $$\frac{F_{\text{drag}}(2v)}{F_{\text{drag}}(v)} = \frac{\frac{1}{2}\rho C_d A (2v)^2}{\frac{1}{2}\rho C_d A v^2} = 4.0$$
-   * Numerical calculation result: $4.0000$ ($|\text{error}| < 10^{-5}$).
-3. **DRS Flap Aerodynamic Drag Reduction (Physics Test 4)**:
-   * Theoretical reduction: $\Delta C_d = -26.0\%$.
-   * Numerical calculation result: Drag reduced from $2940.0\text{ N}$ to $2175.6\text{ N}$ (exactly $26.0\%$).
-4. **Mass Invariance (Physics Test 2)**:
-   * Theoretical acceleration: $a = \frac{F}{m}$. Doubling mass yields $a_2 = 0.5 \cdot a_1$.
-   * Numerical calculation result: $0.5000 \cdot a_1$ ($|\text{error}| < 10^{-5}$).
-
----
-
-## SECTION G — CODE AND ARCHITECTURAL CHANGES MADE
-
-1. `next.config.ts`: Added `devIndicators: false` to remove Next.js dev indicator badge.
-2. `lib/telemetry/validator.ts`: Built production CSV ingestion and telemetry validation engine.
-3. `lib/analysis/lapComparison.ts`: Built distance-aligned lap comparison engine with gap protection.
-4. `components/charts/FormulaTelemetrySuite.tsx`: Built Singapore GP analytics suite with 6 tabs.
-5. `components/telemetry/LiveDashboardHUD.tsx`: Built collapsible 36px minimal HUD toggle.
-6. `components/layout/TopBar.tsx`: Wired functional mode switching and imported `type DataMode`.
-7. `components/three/CameraController.tsx`: Fixed Three.js OrbitControls ref compatibility.
-8. `components/charts/SplitTelemetryWorkbench.tsx` & `SynchronizedTelemetryChart.tsx`: Fixed Recharts callback event typings.
-9. `tests/run_tests.ts`, `tests/validation.test.ts`, `tests/dynamics.test.ts`, `tests/comparison.test.ts`: Complete automated verification test harness.
-10. `docs/`: Created comprehensive documentation suite (8 documents).
-
----
-
-## SECTION H — DEPLOYMENT & PRODUCTION BUILD STATUS
-
-* **Turbopack Build:** Clean compilation in 1.38s.
-* **TypeScript Compilation:** Finished in 4.1s with zero type errors.
-* **Static Page Generation:** All 21 routes statically prerendered in 916ms.
-* **Live Deployment Target:** Ready for automatic zero-downtime deployment on Vercel upon Git push.
-
----
-
-## SECTION I — PRIORITIZED REMAINING BACKLOG
-
-1. **P2 — WebGL Worker Offloading**: Migrate spatial Catmull-Rom spline tessellation to a Web Worker for 120+ Hz displays.
-2. **P2 — Multi-Car Ghost Replay**: Render simultaneous 3D ghost cars for comparison laps directly inside the Three.js viewport.
-3. **P3 — MoTeC `.ld` Binary Importer**: Add native binary parser for MoTeC `.ld` telemetry exports alongside existing CSV ingestion.
+1. Run the Python collector tests and add browser integration checks in a suitable environment; the TypeScript suite and production build passed here.
+2. Connect the historical adapter to actual location, lap, stint and pit data with session-specific coverage and cancellation/error reporting; never synthesize historical positions.
+3. Define real dataset envelopes with source/provider/session/channel/unit/sample coverage and retain imported raw data separately from processed output.
+4. Implement a documented simulator-specific packet adapter, frame/timestamp validation, WebSocket subscription cleanup, stale detection and service diagnostics.
+5. Wire the visible lap comparison, replay, driver, stint and pit-stop pages to selected datasets; otherwise keep them explicitly labeled as fixtures.
+6. Verify circuit geometry sources/layout versions and conduct browser-based route/responsive/console/network QA.

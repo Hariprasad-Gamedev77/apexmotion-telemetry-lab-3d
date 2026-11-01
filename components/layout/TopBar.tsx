@@ -20,9 +20,7 @@ export function TopBar() {
       switchCircuit('austin');
       if (pathname !== '/dashboard') router.push('/dashboard');
     } else if (mode === DATA_MODES.HISTORICAL) {
-      if (pathname !== '/historical' && pathname !== '/dashboard') {
-        router.push('/historical');
-      }
+      router.push('/historical');
     } else if (mode === DATA_MODES.LIVE) {
       if (pathname !== '/connection') {
         router.push('/connection');
@@ -86,7 +84,7 @@ export function TopBar() {
         {dataMode === DATA_MODES.HISTORICAL && (
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3C7] border border-[#FDE68A] text-[#B45309] text-[10px] font-mono font-bold tracking-wider">
             <span className="w-2 h-2 rounded-full bg-[#D97706]" />
-            HISTORICAL RECORD
+            HISTORICAL MODE · COVERAGE VARIES
           </div>
         )}
         {dataMode === DATA_MODES.LIVE && (
@@ -122,7 +120,7 @@ export function TopBar() {
             {dataMode === DATA_MODES.SYNTHETIC
               ? 'SIM ENGINE ACTIVE'
               : wsConnected
-              ? 'UDP STREAM 60HZ'
+              ? 'WEBSOCKET CONNECTED'
               : 'OFFLINE / DISCONNECTED'}
           </span>
         </div>

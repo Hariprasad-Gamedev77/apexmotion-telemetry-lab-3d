@@ -24,49 +24,49 @@ export default function RaceProgressionPage() {
   const totalLaps = activeSession.totalLaps || 56;
   const progressionData: Array<{
     lap: number;
-    LEC: number;
-    SAI: number;
-    VER: number;
-    NOR: number;
-    PIA: number;
-    gapLEC: number;
-    gapSAI: number;
-    gapVER: number;
-    gapNOR: number;
-    gapPIA: number;
+    CAR_A: number;
+    CAR_B: number;
+    CAR_C: number;
+    CAR_D: number;
+    CAR_E: number;
+    gapA: number;
+    gapB: number;
+    gapC: number;
+    gapD: number;
+    gapE: number;
   }> = [];
 
   for (let lap = 1; lap <= totalLaps; lap++) {
-    let posLEC = 1;
-    let posSAI = 2;
-    let posVER = 3;
-    let posNOR = 4;
-    let posPIA = 5;
+    let posA = 1;
+    let posB = 2;
+    let posC = 3;
+    let posD = 4;
+    let posE = 5;
 
-    if (lap >= 21 && lap <= 25) posSAI = 4;
-    if (lap >= 25 && lap <= 28) posVER = 5;
-    if (lap >= 26 && lap <= 29) posLEC = 3;
-    if (lap >= 31 && lap <= 33) posNOR = 5;
-    if (lap >= 32 && lap <= 34) posPIA = 5;
+    if (lap >= 21 && lap <= 25) posB = 4;
+    if (lap >= 25 && lap <= 28) posC = 5;
+    if (lap >= 26 && lap <= 29) posA = 3;
+    if (lap >= 31 && lap <= 33) posD = 5;
+    if (lap >= 32 && lap <= 34) posE = 5;
 
-    const gapLEC = 0.0;
-    const gapSAI = lap < 21 ? lap * 0.42 : lap < 35 ? 6.2 + (lap - 21) * 0.2 : 8.562;
-    const gapVER = lap < 25 ? lap * 0.65 : 14.8 + (lap - 25) * 0.28;
-    const gapNOR = lap < 31 ? lap * 0.58 : 17.2 + (lap - 31) * 0.15;
-    const gapPIA = lap < 32 ? lap * 0.72 : 24.5 + (lap - 32) * 0.22;
+    const gapA = 0.0;
+    const gapB = lap < 21 ? lap * 0.42 : lap < 35 ? 6.2 + (lap - 21) * 0.2 : 8.562;
+    const gapC = lap < 25 ? lap * 0.65 : 14.8 + (lap - 25) * 0.28;
+    const gapD = lap < 31 ? lap * 0.58 : 17.2 + (lap - 31) * 0.15;
+    const gapE = lap < 32 ? lap * 0.72 : 24.5 + (lap - 32) * 0.22;
 
     progressionData.push({
       lap,
-      LEC: posLEC,
-      SAI: posSAI,
-      VER: posVER,
-      NOR: posNOR,
-      PIA: posPIA,
-      gapLEC: Number(gapLEC.toFixed(2)),
-      gapSAI: Number(gapSAI.toFixed(2)),
-      gapVER: Number(gapVER.toFixed(2)),
-      gapNOR: Number(gapNOR.toFixed(2)),
-      gapPIA: Number(gapPIA.toFixed(2)),
+      CAR_A: posA,
+      CAR_B: posB,
+      CAR_C: posC,
+      CAR_D: posD,
+      CAR_E: posE,
+      gapA: Number(gapA.toFixed(2)),
+      gapB: Number(gapB.toFixed(2)),
+      gapC: Number(gapC.toFixed(2)),
+      gapD: Number(gapD.toFixed(2)),
+      gapE: Number(gapE.toFixed(2)),
     });
   }
 
@@ -84,7 +84,7 @@ export default function RaceProgressionPage() {
                 RACE PROGRESSION & POSITION HISTORY
               </h1>
               <p className="text-xs font-mono text-[#64748B] mt-0.5">
-                {activeSession.meetingName} • {activeSession.circuitName} ({totalLaps} Laps)
+                SYNTHETIC DEMO FIXTURE • {activeSession.circuitName} ({totalLaps} example laps)
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function RaceProgressionPage() {
             </h3>
           </div>
           <span className="text-[10px] font-mono text-[#047857] bg-[#D1FAE5] px-2 py-0.5 rounded border border-[#A7F3D0] font-semibold">
-            OFFICIAL RACE ARCHIVE
+            GENERATED EXAMPLE · NOT RACE DATA
           </span>
         </div>
 
@@ -184,19 +184,19 @@ export default function RaceProgressionPage() {
 
               {metric === 'position' ? (
                 <>
-                  <Line type="stepAfter" dataKey="LEC" name="LEC (Ferrari)" stroke="#DC2626" strokeWidth={2.5} dot={false} />
-                  <Line type="stepAfter" dataKey="SAI" name="SAI (Ferrari)" stroke="#E11D48" strokeWidth={2} dot={false} />
-                  <Line type="stepAfter" dataKey="VER" name="VER (Red Bull)" stroke="#1E40AF" strokeWidth={2} dot={false} />
-                  <Line type="stepAfter" dataKey="NOR" name="NOR (McLaren)" stroke="#EA580C" strokeWidth={2} dot={false} />
-                  <Line type="stepAfter" dataKey="PIA" name="PIA (McLaren)" stroke="#F59E0B" strokeWidth={2} dot={false} />
+                  <Line type="stepAfter" dataKey="CAR_A" name="Demo Car A" stroke="#DC2626" strokeWidth={2.5} dot={false} />
+                  <Line type="stepAfter" dataKey="CAR_B" name="Demo Car B" stroke="#E11D48" strokeWidth={2} dot={false} />
+                  <Line type="stepAfter" dataKey="CAR_C" name="Demo Car C" stroke="#1E40AF" strokeWidth={2} dot={false} />
+                  <Line type="stepAfter" dataKey="CAR_D" name="Demo Car D" stroke="#EA580C" strokeWidth={2} dot={false} />
+                  <Line type="stepAfter" dataKey="CAR_E" name="Demo Car E" stroke="#F59E0B" strokeWidth={2} dot={false} />
                 </>
               ) : (
                 <>
-                  <Line type="monotone" dataKey="gapLEC" name="LEC (Leader)" stroke="#DC2626" strokeWidth={2.5} dot={false} />
-                  <Line type="monotone" dataKey="gapSAI" name="SAI" stroke="#E11D48" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="gapVER" name="VER" stroke="#1E40AF" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="gapNOR" name="NOR" stroke="#EA580C" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="gapPIA" name="PIA" stroke="#F59E0B" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="gapA" name="Demo Car A (leader)" stroke="#DC2626" strokeWidth={2.5} dot={false} />
+                  <Line type="monotone" dataKey="gapB" name="Demo Car B" stroke="#E11D48" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="gapC" name="Demo Car C" stroke="#1E40AF" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="gapD" name="Demo Car D" stroke="#EA580C" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="gapE" name="Demo Car E" stroke="#F59E0B" strokeWidth={2} dot={false} />
                 </>
               )}
             </LineChart>
@@ -208,7 +208,7 @@ export default function RaceProgressionPage() {
           <div className="flex items-center gap-2 text-[#64748B]">
             <Wrench size={14} className="text-[#D97706]" />
             <span className="font-bold text-[#0F172A]">Pit Stops Executed: </span>
-            <span>SAI (L21: 2.6s) • VER (L25: 2.7s) • LEC (L26: 2.5s) • NOR (L31: 2.2s) • PIA (L32: 2.6s)</span>
+            <span>Demo Cars A–E · illustrative pit stop values only</span>
           </div>
 
           <div className="flex items-center gap-2 text-[#047857] font-medium">

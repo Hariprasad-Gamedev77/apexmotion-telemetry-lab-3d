@@ -20,7 +20,7 @@ export default function SessionHistoryPage() {
             SESSION RECORDINGS & HISTORY
           </h1>
           <p className="text-xs font-mono font-medium text-slate-500">
-            Browse recorded historical sessions and past simulation runs
+            Reference session catalogue. Telemetry is not stored with these entries.
           </p>
         </div>
       </div>
@@ -37,10 +37,10 @@ export default function SessionHistoryPage() {
             </div>
 
             <Link
-              href="/dashboard"
+              href="/historical"
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-mono text-xs font-bold shadow-xs active:scale-95 transition-all"
             >
-              <Play size={12} fill="currentColor" /> Open Replay
+              <Play size={12} fill="currentColor" /> Check provider session
             </Link>
           </div>
         ))}

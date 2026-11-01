@@ -3,7 +3,7 @@
 // APEX TELEMETRY 3D — Two-Lap Telemetry Comparison Workbench
 // Light Theme with high-contrast traces, Reeve styling, and vibrant colors
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -15,11 +15,10 @@ import {
 } from 'recharts';
 import { useApexStore } from '@/lib/store';
 import { GitCompare, ArrowUpRight } from 'lucide-react';
+import { formatLapTime, formatDeltaTime } from '@/lib/utils';
 
 export default function ComparisonPage() {
   const { telemetryHistory } = useApexStore();
-  const [refLapNum, setRefLapNum] = useState<number>(4); // Best lap
-  const [compLapNum, setCompLapNum] = useState<number>(2);
 
   // Generate comparison data: reference lap vs comparison lap
   const comparisonData = useMemo(() => {
@@ -28,18 +27,24 @@ export default function ComparisonPage() {
     const step = Math.max(1, Math.floor(telemetryHistory.length / 140));
     const result = [];
     let cumulativeDelta = 0;
+    let previous: { distance: number; refSpeed: number; compSpeed: number } | undefined;
+    const indices = Array.from({ length: Math.ceil(telemetryHistory.length / step) }, (_, index) => index * step);
+    const lastIndex = telemetryHistory.length - 1;
+    if (indices[indices.length - 1] !== lastIndex) indices.push(lastIndex);
 
-    for (let i = 0; i < telemetryHistory.length; i += step) {
+    for (const i of indices) {
       const ref = telemetryHistory[i];
       const dist = ref.distanceMeters;
       const speedOffset = Math.sin(dist / 200) * 8 - (dist > 3000 ? 5 : 0);
       const compSpeed = Math.max(60, Math.min(345, ref.speedKph + speedOffset));
 
-      const vRefMs = Math.max(10, ref.speedKph / 3.6);
-      const vCompMs = Math.max(10, compSpeed / 3.6);
-      const dx = step * 10;
-      const dtStep = (dx / vCompMs) - (dx / vRefMs);
-      cumulativeDelta += dtStep;
+      if (previous && ref.speedKph > 0 && compSpeed > 0) {
+        const dx = dist - previous.distance;
+        const compSeconds = dx * 0.5 * (3.6 / previous.compSpeed + 3.6 / compSpeed);
+        const refSeconds = dx * 0.5 * (3.6 / previous.refSpeed + 3.6 / ref.speedKph);
+        cumulativeDelta += compSeconds - refSeconds;
+      }
+      previous = { distance: dist, refSpeed: ref.speedKph, compSpeed };
 
       result.push({
         distance: Math.round(dist),
@@ -56,7 +61,11 @@ export default function ComparisonPage() {
     return result;
   }, [telemetryHistory]);
 
-  const finalDelta = comparisonData[comparisonData.length - 1]?.deltaTime ?? 0.625;
+  const finalDelta = comparisonData[comparisonData.length - 1]?.deltaTime ?? 0;
+  const refLapTime = telemetryHistory.length > 1
+    ? telemetryHistory[telemetryHistory.length - 1].timestamp - telemetryHistory[0].timestamp
+    : 0;
+  const comparisonLapTime = refLapTime + finalDelta;
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto flex flex-col gap-6 select-none">
@@ -72,7 +81,7 @@ export default function ComparisonPage() {
             </h1>
           </div>
           <p className="text-xs font-mono font-medium text-slate-500 mt-1">
-            Distance-aligned telemetry analysis • Δt = t_comp - t_ref
+            Synthetic comparison fixture derived from the procedural reference lap; comparison speed is deliberately perturbed
           </p>
         </div>
 
@@ -80,20 +89,20 @@ export default function ComparisonPage() {
         <div className="flex items-center gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono uppercase text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-200 font-bold">
-              REF (L4)
+              SYNTHETIC REF
             </span>
-            <span className="font-mono text-xs font-bold text-slate-800">1:21.942</span>
+            <span className="font-mono text-xs font-bold text-slate-800">{formatLapTime(refLapTime)}</span>
           </div>
           <span className="text-slate-300">•</span>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 font-bold">
-              COMP (L2)
+              SYNTHETIC COMP
             </span>
-            <span className="font-mono text-xs font-bold text-slate-800">1:22.915</span>
+            <span className="font-mono text-xs font-bold text-slate-800">{formatLapTime(comparisonLapTime)}</span>
           </div>
           <span className="text-slate-300">•</span>
           <div className="flex items-center gap-1 font-mono text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
-            <span>+{Math.abs(finalDelta).toFixed(3)}s</span>
+            <span>{formatDeltaTime(finalDelta)}</span>
             <ArrowUpRight size={14} />
           </div>
         </div>
@@ -106,7 +115,7 @@ export default function ComparisonPage() {
             DELTA TIME ACCUMULATION ($\Delta t$)
           </span>
           <span className="font-mono text-[11px] text-slate-500">
-            Convention: Positive (+) = Comparison lap losing time
+            Cumulative time delta from the generated speeds; positive means comparison is slower
           </span>
         </div>
 

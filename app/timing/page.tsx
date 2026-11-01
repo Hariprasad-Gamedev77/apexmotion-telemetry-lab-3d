@@ -9,7 +9,7 @@ import { Timer } from 'lucide-react';
 import { formatLapTime } from '@/lib/utils';
 
 export default function LiveTimingPage() {
-  const { drivers, activeSession } = useApexStore();
+  const { drivers, activeSession, dataMode } = useApexStore();
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto flex flex-col gap-6 select-none">
@@ -25,13 +25,13 @@ export default function LiveTimingPage() {
             </h1>
           </div>
           <p className="text-xs font-mono font-medium text-slate-500 mt-1">
-            {activeSession.meetingName} • Lap {drivers[0]?.lapNumber || 1} / {activeSession.totalLaps}
+            {dataMode === 'synthetic' ? 'SYNTHETIC GRID DEMO' : 'NO LIVE TIMING DATA'} • {activeSession.meetingName}
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-full shadow-xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <span>RACE CLOCK ACTIVE</span>
+          <span>{dataMode === 'synthetic' ? 'SIMULATION MODE' : 'DISCONNECTED'}</span>
         </div>
       </div>
 
@@ -54,6 +54,13 @@ export default function LiveTimingPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
+              {drivers.length === 0 && (
+                <tr>
+                  <td colSpan={10} className="px-5 py-10 text-center text-slate-500">
+                    No timing records are loaded for this source.
+                  </td>
+                </tr>
+              )}
               {drivers.map((drv, idx) => (
                 <tr key={drv.driverNumber} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-3.5 px-5 font-black text-sm text-slate-900">

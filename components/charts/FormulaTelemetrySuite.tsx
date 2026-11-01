@@ -43,74 +43,74 @@ export function FormulaTelemetrySuite({ activeTab, onTabChange }: FormulaTelemet
 
   const totalLaps = activeSession.totalLaps || 56;
 
-  // Race Progression Data (Austin / Singapore 56-62 laps)
+  // Illustrative progression fixture, not provider session data.
   const progressionData: Array<{
     lap: number;
-    LEC: number;
-    SAI: number;
-    VER: number;
-    NOR: number;
-    PIA: number;
+    CAR_A: number;
+    CAR_B: number;
+    CAR_C: number;
+    CAR_D: number;
+    CAR_E: number;
   }> = [];
 
   for (let lap = 1; lap <= totalLaps; lap++) {
-    let pLEC = 1;
-    let pSAI = 2;
-    let pVER = 3;
-    let pNOR = 4;
-    let pPIA = 5;
+    let pA = 1;
+    let pB = 2;
+    let pC = 3;
+    let pD = 4;
+    let pE = 5;
 
-    if (lap >= 21 && lap <= 25) pSAI = 4;
-    if (lap >= 25 && lap <= 28) pVER = 5;
-    if (lap >= 26 && lap <= 29) pLEC = 3;
-    if (lap >= 31 && lap <= 33) pNOR = 5;
-    if (lap >= 32 && lap <= 34) pPIA = 5;
+    if (lap >= 21 && lap <= 25) pB = 4;
+    if (lap >= 25 && lap <= 28) pC = 5;
+    if (lap >= 26 && lap <= 29) pA = 3;
+    if (lap >= 31 && lap <= 33) pD = 5;
+    if (lap >= 32 && lap <= 34) pE = 5;
 
-    progressionData.push({ lap, LEC: pLEC, SAI: pSAI, VER: pVER, NOR: pNOR, PIA: pPIA });
+    progressionData.push({ lap, CAR_A: pA, CAR_B: pB, CAR_C: pC, CAR_D: pD, CAR_E: pE });
   }
 
-  // Pit Stops Log Data (Verified Austin / Singapore timing)
+  // Illustrative pit stop values; not retrieved from the selected session.
   const pitStops = [
-    { driver: 'SAI', num: 55, lap: 21, stationary: 2.6, totalLane: 23.96, compoundFrom: 'Medium', compoundTo: 'Hard' },
-    { driver: 'VER', num: 1, lap: 25, stationary: 2.7, totalLane: 24.22, compoundFrom: 'Medium', compoundTo: 'Hard' },
-    { driver: 'LEC', num: 16, lap: 26, stationary: 2.5, totalLane: 23.81, compoundFrom: 'Medium', compoundTo: 'Hard' },
-    { driver: 'NOR', num: 4, lap: 31, stationary: 2.2, totalLane: 23.73, compoundFrom: 'Medium', compoundTo: 'Hard' },
-    { driver: 'PIA', num: 81, lap: 32, stationary: 2.6, totalLane: 24.10, compoundFrom: 'Medium', compoundTo: 'Hard' },
-    { driver: 'RUS', num: 63, lap: 40, stationary: 2.8, totalLane: 24.32, compoundFrom: 'Hard', compoundTo: 'Medium' },
+    { driver: 'Demo Car B', num: 2, lap: 21, stationary: 2.6, totalLane: 23.96, compoundFrom: 'Medium', compoundTo: 'Hard' },
+    { driver: 'Demo Car C', num: 3, lap: 25, stationary: 2.7, totalLane: 24.22, compoundFrom: 'Medium', compoundTo: 'Hard' },
+    { driver: 'Demo Car A', num: 1, lap: 26, stationary: 2.5, totalLane: 23.81, compoundFrom: 'Medium', compoundTo: 'Hard' },
+    { driver: 'Demo Car D', num: 4, lap: 31, stationary: 2.2, totalLane: 23.73, compoundFrom: 'Medium', compoundTo: 'Hard' },
+    { driver: 'Demo Car E', num: 5, lap: 32, stationary: 2.6, totalLane: 24.10, compoundFrom: 'Medium', compoundTo: 'Hard' },
+    { driver: 'Demo Car F', num: 6, lap: 40, stationary: 2.8, totalLane: 24.32, compoundFrom: 'Hard', compoundTo: 'Medium' },
   ];
 
   // Stint Strategy Data
   const strategyData = [
     {
-      driver: 'LEC (#16)',
+      driver: 'Demo Car A',
       stints: [
         { compound: 'Medium', laps: 26, color: 'bg-amber-400 text-black', text: 'L1-L26 (Medium)' },
         { compound: 'Hard', laps: 30, color: 'bg-slate-200 text-slate-800 border border-slate-300', text: 'L27-L56 (Hard)' },
       ],
     },
     {
-      driver: 'SAI (#55)',
+      driver: 'Demo Car B',
       stints: [
         { compound: 'Medium', laps: 21, color: 'bg-amber-400 text-black', text: 'L1-L21 (Medium)' },
         { compound: 'Hard', laps: 35, color: 'bg-slate-200 text-slate-800 border border-slate-300', text: 'L22-L56 (Hard)' },
       ],
     },
     {
-      driver: 'VER (#1)',
+      driver: 'Demo Car C',
       stints: [
         { compound: 'Medium', laps: 25, color: 'bg-amber-400 text-black', text: 'L1-L25 (Medium)' },
         { compound: 'Hard', laps: 31, color: 'bg-slate-200 text-slate-800 border border-slate-300', text: 'L26-L56 (Hard)' },
       ],
     },
     {
-      driver: 'NOR (#4)',
+      driver: 'Demo Car D',
       stints: [
         { compound: 'Medium', laps: 31, color: 'bg-amber-400 text-black', text: 'L1-L31 (Medium)' },
         { compound: 'Hard', laps: 25, color: 'bg-slate-200 text-slate-800 border border-slate-300', text: 'L32-L56 (Hard)' },
       ],
     },
     {
-      driver: 'PIA (#81)',
+      driver: 'Demo Car E',
       stints: [
         { compound: 'Medium', laps: 32, color: 'bg-amber-400 text-black', text: 'L1-L32 (Medium)' },
         { compound: 'Hard', laps: 24, color: 'bg-slate-200 text-slate-800 border border-slate-300', text: 'L33-L56 (Hard)' },
@@ -120,6 +120,9 @@ export function FormulaTelemetrySuite({ activeTab, onTabChange }: FormulaTelemet
 
   return (
     <div className="flex flex-col gap-3 font-mono text-xs select-none">
+      <div role="note" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold text-amber-900">
+        SYNTHETIC DEMONSTRATION FIXTURES · Race, stint and pit-stop values below are not selected-session records.
+      </div>
       {/* Tab Navigation Pill Bar (Daylight Theme) */}
       <div className="flex flex-wrap items-center gap-1.5 bg-[#F1F5F9] p-1.5 rounded-2xl border border-[#E2E8F0]">
         <button
@@ -201,7 +204,7 @@ export function FormulaTelemetrySuite({ activeTab, onTabChange }: FormulaTelemet
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E2E8F0] pb-3">
             <div>
               <h3 className="text-sm font-bold text-[#0F172A]">
-                {activeSession.meetingName} — Official Timing Analysis
+                Synthetic demonstration values — not provider timing
               </h3>
               <p className="text-[11px] text-[#64748B]">
                 Benchmark comparison against optimal theoretical lap • {circuit.name}
@@ -266,11 +269,11 @@ export function FormulaTelemetrySuite({ activeTab, onTabChange }: FormulaTelemet
                   labelFormatter={(l) => `Race Lap ${l}`}
                 />
                 <Legend verticalAlign="top" height={32} />
-                <Line type="stepAfter" dataKey="LEC" name="LEC (Ferrari)" stroke="#DC2626" strokeWidth={2} dot={false} />
-                <Line type="stepAfter" dataKey="SAI" name="SAI (Ferrari)" stroke="#E11D48" strokeWidth={1.5} dot={false} />
-                <Line type="stepAfter" dataKey="VER" name="VER (Red Bull)" stroke="#1E40AF" strokeWidth={2} dot={false} />
-                <Line type="stepAfter" dataKey="NOR" name="NOR (McLaren)" stroke="#EA580C" strokeWidth={2} dot={false} />
-                <Line type="stepAfter" dataKey="PIA" name="PIA (McLaren)" stroke="#F59E0B" strokeWidth={1.5} dot={false} />
+                <Line type="stepAfter" dataKey="CAR_A" name="Demo Car A" stroke="#DC2626" strokeWidth={2} dot={false} />
+                <Line type="stepAfter" dataKey="CAR_B" name="Demo Car B" stroke="#E11D48" strokeWidth={1.5} dot={false} />
+                <Line type="stepAfter" dataKey="CAR_C" name="Demo Car C" stroke="#1E40AF" strokeWidth={2} dot={false} />
+                <Line type="stepAfter" dataKey="CAR_D" name="Demo Car D" stroke="#EA580C" strokeWidth={2} dot={false} />
+                <Line type="stepAfter" dataKey="CAR_E" name="Demo Car E" stroke="#F59E0B" strokeWidth={1.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -322,7 +325,7 @@ export function FormulaTelemetrySuite({ activeTab, onTabChange }: FormulaTelemet
           <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
             <div>
               <h3 className="text-sm font-bold text-[#0F172A]">
-                Official Pit Lane Stops & Stationary Durations
+                Illustrative Pit Lane Stop Values
               </h3>
               <p className="text-[11px] text-[#64748B]">
                 Wheels-stopped box time vs total pit lane transit time
@@ -374,7 +377,7 @@ export function FormulaTelemetrySuite({ activeTab, onTabChange }: FormulaTelemet
                 2D Track Map & Corner Analysis ({circuit.name})
               </h3>
               <p className="text-[11px] text-[#64748B]">
-                Track Length: {circuit.lengthMeters}m • Clockwise • Verified DRS Activation Zones
+                Track Length: {circuit.lengthMeters}m • Geometry and DRS registry values are unverified
               </p>
             </div>
           </div>

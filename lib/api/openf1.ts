@@ -199,9 +199,9 @@ export const CURATED_HISTORICAL_SESSIONS: SessionMetadata[] = [
     totalLaps: 56,
     trackLengthMeters: 5513,
     dataMode: DATA_MODES.HISTORICAL,
-    availableDrivers: [16, 55, 1, 4, 81, 63],
-    hasCoordinateStream: true,
-    hasHighFrequencyTelemetry: true,
+    availableDrivers: [],
+    hasCoordinateStream: false,
+    hasHighFrequencyTelemetry: false,
     circuitPassport: VERIFIED_CIRCUITS.austin,
   },
   {
@@ -217,9 +217,9 @@ export const CURATED_HISTORICAL_SESSIONS: SessionMetadata[] = [
     totalLaps: 62,
     trackLengthMeters: 4940,
     dataMode: DATA_MODES.HISTORICAL,
-    availableDrivers: [4, 1, 81, 16, 44],
-    hasCoordinateStream: true,
-    hasHighFrequencyTelemetry: true,
+    availableDrivers: [],
+    hasCoordinateStream: false,
+    hasHighFrequencyTelemetry: false,
     circuitPassport: VERIFIED_CIRCUITS.singapore,
   },
   {
@@ -235,9 +235,9 @@ export const CURATED_HISTORICAL_SESSIONS: SessionMetadata[] = [
     totalLaps: 52,
     trackLengthMeters: 5891,
     dataMode: DATA_MODES.HISTORICAL,
-    availableDrivers: [44, 4, 1, 81, 55],
-    hasCoordinateStream: true,
-    hasHighFrequencyTelemetry: true,
+    availableDrivers: [],
+    hasCoordinateStream: false,
+    hasHighFrequencyTelemetry: false,
     circuitPassport: VERIFIED_CIRCUITS.silverstone,
   },
   {
@@ -253,9 +253,9 @@ export const CURATED_HISTORICAL_SESSIONS: SessionMetadata[] = [
     totalLaps: 44,
     trackLengthMeters: 7004,
     dataMode: DATA_MODES.HISTORICAL,
-    availableDrivers: [44, 81, 16, 1, 4],
-    hasCoordinateStream: true,
-    hasHighFrequencyTelemetry: true,
+    availableDrivers: [],
+    hasCoordinateStream: false,
+    hasHighFrequencyTelemetry: false,
     circuitPassport: VERIFIED_CIRCUITS.spa,
   },
   {
@@ -271,9 +271,9 @@ export const CURATED_HISTORICAL_SESSIONS: SessionMetadata[] = [
     totalLaps: 53,
     trackLengthMeters: 5793,
     dataMode: DATA_MODES.HISTORICAL,
-    availableDrivers: [16, 81, 4, 55, 44],
-    hasCoordinateStream: true,
-    hasHighFrequencyTelemetry: true,
+    availableDrivers: [],
+    hasCoordinateStream: false,
+    hasHighFrequencyTelemetry: false,
     circuitPassport: VERIFIED_CIRCUITS.monza,
   },
 ];
@@ -309,21 +309,8 @@ export async function fetchHistoricalMeetings(year: number = 2024): Promise<Meet
       isCancelled: m.is_cancelled,
     }));
   } catch (error) {
-    console.warn(`[OpenF1] fetchHistoricalMeetings(${year}) fallback:`, error);
-    return CURATED_HISTORICAL_SESSIONS.map((s, idx) => ({
-      meetingKey: s.meetingKey || 1200 + idx,
-      meetingName: s.meetingName,
-      officialName: s.meetingName,
-      location: s.country,
-      countryKey: idx,
-      countryCode: s.country.slice(0, 3).toUpperCase(),
-      countryName: s.country,
-      circuitKey: 9,
-      circuitShortName: s.circuitName,
-      dateStart: s.date,
-      dateEnd: s.date,
-      year: s.year,
-    }));
+    console.warn(`[OpenF1] fetchHistoricalMeetings(${year}) failed; no fixture data substituted:`, error);
+    return [];
   }
 }
 
@@ -368,18 +355,18 @@ export async function fetchMeetingSessions(meetingKey: number): Promise<SessionM
           ? 'Sprint'
           : 'Practice',
         date: s.date_start.split('T')[0],
-        totalLaps: s.session_name.includes('Race') ? 56 : 25,
-        trackLengthMeters: passport?.lengthMeters || 5400,
+        totalLaps: 0,
+        trackLengthMeters: passport?.lengthMeters || 0,
         dataMode: DATA_MODES.HISTORICAL,
-        availableDrivers: [1, 4, 16, 44, 81],
-        hasCoordinateStream: true,
-        hasHighFrequencyTelemetry: true,
+        availableDrivers: [],
+        hasCoordinateStream: false,
+        hasHighFrequencyTelemetry: false,
         circuitPassport: passport,
       };
     });
   } catch (error) {
-    console.warn(`[OpenF1] fetchMeetingSessions(${meetingKey}) fallback:`, error);
-    return CURATED_HISTORICAL_SESSIONS.filter((s) => s.meetingKey === meetingKey);
+    console.warn(`[OpenF1] fetchMeetingSessions(${meetingKey}) failed; no fixture data substituted:`, error);
+    return [];
   }
 }
 
@@ -408,15 +395,8 @@ export async function fetchSessionDrivers(sessionKey: number): Promise<DriverIde
       meetingKey: d.meeting_key,
     }));
   } catch (error) {
-    console.warn(`[OpenF1] fetchSessionDrivers(${sessionKey}) fallback:`, error);
-    return [
-      { driverNumber: 1, broadcastName: 'M VERSTAPPEN', fullName: 'Max Verstappen', firstName: 'Max', lastName: 'Verstappen', nameAcronym: 'VER', teamName: 'Red Bull Racing', teamColour: '#3671C6', headshotUrl: null, countryCode: 'NED', sessionKey },
-      { driverNumber: 4, broadcastName: 'L NORRIS', fullName: 'Lando Norris', firstName: 'Lando', lastName: 'Norris', nameAcronym: 'NOR', teamName: 'McLaren', teamColour: '#FF8000', headshotUrl: null, countryCode: 'GBR', sessionKey },
-      { driverNumber: 16, broadcastName: 'C LECLERC', fullName: 'Charles Leclerc', firstName: 'Charles', lastName: 'Leclerc', nameAcronym: 'LEC', teamName: 'Ferrari', teamColour: '#E80020', headshotUrl: null, countryCode: 'MON', sessionKey },
-      { driverNumber: 81, broadcastName: 'O PIASTRI', fullName: 'Oscar Piastri', firstName: 'Oscar', lastName: 'Piastri', nameAcronym: 'PIA', teamName: 'McLaren', teamColour: '#FF8000', headshotUrl: null, countryCode: 'AUS', sessionKey },
-      { driverNumber: 44, broadcastName: 'L HAMILTON', fullName: 'Lewis Hamilton', firstName: 'Lewis', lastName: 'Hamilton', nameAcronym: 'HAM', teamName: 'Mercedes', teamColour: '#27F4D2', headshotUrl: null, countryCode: 'GBR', sessionKey },
-      { driverNumber: 55, broadcastName: 'C SAINZ', fullName: 'Carlos Sainz', firstName: 'Carlos', lastName: 'Sainz', nameAcronym: 'SAI', teamName: 'Ferrari', teamColour: '#E80020', headshotUrl: null, countryCode: 'ESP', sessionKey },
-    ];
+    console.warn(`[OpenF1] fetchSessionDrivers(${sessionKey}) failed; returning no drivers:`, error);
+    return [];
   }
 }
 
@@ -447,7 +427,7 @@ export async function fetchSessionLaps(sessionKey: number, driverNumber?: number
         valid: lapTime > 0 && !lap.is_pit_out_lap,
         isPersonalBest: isPb,
         isSessionBest: false,
-        tyreCompound: 'MEDIUM',
+        tyreCompound: 'UNKNOWN',
         isPitOutLap: lap.is_pit_out_lap,
       };
     });
@@ -499,7 +479,9 @@ export async function fetchSessionStints(sessionKey: number): Promise<Stint[]> {
       stintNumber: s.stint_number,
       lapStart: s.lap_start,
       lapEnd: s.lap_end,
-      compound: (s.compound?.toUpperCase() as Stint['compound']) || 'MEDIUM',
+      compound: ['SOFT', 'MEDIUM', 'HARD', 'INTER', 'WET'].includes((s.compound ?? '').toUpperCase())
+        ? (s.compound!.toUpperCase() as Stint['compound'])
+        : 'UNKNOWN',
       tyreAgeAtStart: s.tyre_age_at_start,
     }));
   } catch (error) {

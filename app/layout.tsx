@@ -5,7 +5,7 @@ import { TopBar } from '@/components/layout/TopBar';
 
 export const metadata: Metadata = {
   title: 'APEX TELEMETRY 3D — Motorsport Engineering Workbench',
-  description: 'Browser-based motorsport engineering workbench connecting racing simulator telemetry, historical Formula 1 datasets, synchronized 3D replay, and vehicle performance analysis.',
+  description: 'Motorsport workbench with synthetic 3D demonstrations, OpenF1 session metadata browsing, CSV validation, and an educational UDP collector.',
   icons: {
     icon: '/favicon.ico',
   },

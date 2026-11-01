@@ -45,7 +45,7 @@ export default function AboutPage() {
             <h3 className="font-mono font-bold text-sm">1. Binary Packet Decoding & Networking</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            The Python backend listens for raw UDP datagrams on loopback port 20777 with an OS-level <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">SO_RCVBUF</code> socket buffer. Packets are parsed using Python&apos;s standard-library <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">struct.unpack_from</code> with little-endian format strings (<code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;BBIf</code> header, <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;Hff</code> telemetry). Bounded asynchronous queues protect against memory growth during UI lag.
+            The Python collector contains an educational UDP fixture decoder using <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;BBIf</code> and <code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-mono">&lt;Hff</code>. This is not a commercial F1 simulator packet format. Frontend live telemetry subscription and collector health polling are not implemented.
           </p>
         </div>
 
@@ -67,11 +67,11 @@ export default function AboutPage() {
             <h3 className="font-mono font-bold text-sm">3. Longitudinal Dynamics Physics Model</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            Vehicles are simulated via semi-implicit Euler integration:
+            A simplified synthetic point-mass model uses semi-implicit Euler integration:
             <span className="block my-2 font-mono text-xs font-semibold text-sky-800 bg-sky-50 p-2 rounded-xl border border-sky-200">
               {'a = (F_drive - F_brake - F_drag - F_rr) / m'}
             </span>
-            where aerodynamic drag incorporates DRS flap state (<code className="text-sky-700 bg-sky-50 px-1 py-0.5 rounded font-mono">{'F_drag = 0.5 * rho * Cd * A * v^2'}</code>). Corner speeds are constrained by tire grip limits (<code className="text-sky-700 bg-sky-50 px-1 py-0.5 rounded font-mono">{'v_max = sqrt(a_lat / kappa)'}</code>).
+            where configured aerodynamic drag is quadratic in speed. Fuel mass, tyre load sensitivity, suspension, powertrain maps, track gradient forces, and calibrated vehicle parameters are omitted; the model is for demonstration and not a complete racing vehicle model.
           </p>
         </div>
 
@@ -82,7 +82,7 @@ export default function AboutPage() {
             <h4 className="font-mono font-bold text-sm">4. Deterministic Clock & Data Provenance</h4>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            A single logical replay clock drives both the 3D WebGL car position and the Recharts telemetry traces synchronously. Scrubbing the timeline instantaneously seeks both representations. Synthetic data is strictly tagged with persistent badges and never silently mingled with historical records.
+            The synthetic replay clock drives the procedural vehicle and charts. Historical session selection currently loads metadata only; real GPS replay and complete dataset level provenance are not implemented.
           </p>
         </div>
       </div>

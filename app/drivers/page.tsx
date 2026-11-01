@@ -1,7 +1,7 @@
 'use client';
 
 // APEX TELEMETRY 3D — Driver Universe & Head-to-Head Comparison (Daylight Theme)
-// Season rosters, driver profiles, verified statistics, and telemetry comparisons.
+// Static season reference rows and synthetic-grid comparison display.
 
 import React, { useState } from 'react';
 import { useApexStore } from '@/lib/store';
@@ -48,7 +48,7 @@ export default function DriverUniversePage() {
                 DRIVER UNIVERSE & HEAD-TO-HEAD
               </h1>
               <p className="text-xs font-mono text-[#64748B] mt-0.5">
-                Driver profiles, verified season classifications, and head-to-head telemetry differential
+                Static season reference values; head-to-head telemetry is synthetic unless an observed dataset is loaded
               </p>
             </div>
           </div>

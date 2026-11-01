@@ -1,7 +1,6 @@
 'use client';
 
-// APEX TELEMETRY 3D — Official Championship Statistics & Standings (Daylight Theme)
-// Verified Season Records for 2024 & 2023 without fabricated numbers.
+// APEX TELEMETRY 3D — Static Championship Statistics Reference
 
 import React, { useState } from 'react';
 import { getVerifiedChampionshipStandings } from '@/lib/api/openf1';
@@ -29,7 +28,7 @@ export default function ChampionshipStatsPage() {
             </h1>
           </div>
           <p className="text-xs font-mono text-[#64748B] mt-1">
-            Verified FIA Formula 1 World Championship points, race victories, and constructor classifications
+            Static season reference values; provider provenance has not been independently verified
           </p>
         </div>
 
@@ -63,7 +62,7 @@ export default function ChampionshipStatsPage() {
               </h2>
             </div>
             <span className="text-[10px] font-mono text-[#047857] bg-[#D1FAE5] px-2 py-0.5 rounded border border-[#A7F3D0] font-semibold">
-              OFFICIAL RESULTS
+              REFERENCE FIXTURE
             </span>
           </div>
 

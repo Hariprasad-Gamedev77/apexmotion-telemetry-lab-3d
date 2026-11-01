@@ -2,7 +2,7 @@
 
 > _See the race. Understand the data._
 
-**APEX TELEMETRY 3D** is a browser-based motorsport engineering workbench connecting real-time racing simulator UDP telemetry, historical Formula 1 Grand Prix datasets, synchronized 3D multi-car replays, and longitudinal vehicle dynamics analysis.
+**APEX TELEMETRY 3D** is a motorsport data workbench with a synthetic circuit demonstration, an OpenF1 session metadata browser, telemetry CSV validation, and an educational Python UDP collector. Several historic replay and live simulator workflows remain incomplete; see [Known Issues](docs/KNOWN_ISSUES.md).
 
 ---
 
@@ -16,16 +16,16 @@
    - Curvature-based corner velocity envelope ($v_{\text{max}} = \sqrt{a_{\text{lat}} / \kappa}$) and autonomous AI driver.
    - Distinct, persistent `SYNTHETIC DEMO` visual indicator.
 
-2. **Mode B — Historical Race Analysis**:
-   - Integrated with the **OpenF1** historical API for authenticated Grand Prix telemetry (Silverstone, Spa-Francorchamps, Monza, etc.).
-   - Track-relative GPS coordinate normalization and multi-driver position progression.
-   - Distance-aligned lap comparison with delta time accumulation ($\Delta t = t_{\text{comp}} - t_{\text{ref}}$).
+2. **Mode B — Historical Session Browser**:
+   - Reads supported session metadata from the public **OpenF1** API.
+   - API failures no longer substitute a curated fixture as if it were fetched data.
+   - Historical GPS replay and complete session telemetry loading are not implemented.
 
-3. **Mode C — Live Simulator Telemetry**:
-   - Dedicated Python UDP receiver listening on loopback port `20777` with OS-level `SO_RCVBUF`.
-   - Binary packet decoding via standard-library `struct` (`<BBIf` header, `<Hff` telemetry payload, `<ff` lap/position payload).
-   - Real-time 60Hz WebSocket broadcast bridge to the browser frontend.
-   - Interactive packet diagnostics interface displaying packet rates, decoded frames, and drop counters.
+3. **Mode C — Educational UDP Fixture Collector**:
+   - Python UDP receiver and WebSocket broadcaster.
+   - Decoder uses the project's educational `<BBIf` header and `<Hff` payload; these are not EA SPORTS F1 UDP packets.
+   - Browser connection setup can verify a WebSocket handshake, but it does not subscribe to or render collector telemetry.
+   - No fixed 60 Hz source or broadcast rate is promised.
 
 ---
 
@@ -113,7 +113,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Click **"La
 
 ### 2. Python UDP Collector & Live Simulator Setup
 
-If you want to receive telemetry from a real racing simulator (e.g., EA Sports F1 24, F1 23):
+To run the educational fixture collector (not compatible with commercial simulator packets):
 
 ```bash
 cd python-collector
@@ -133,11 +133,9 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 #### Simulator Configuration:
-1. Open your racing game's telemetry settings.
-2. Enable UDP Telemetry.
-3. Target IP: `127.0.0.1`
-4. Target Port: `20777`
-5. Send Rate: `60 Hz`
+1. Run the collector locally.
+2. Send packets matching the fixture schema documented in `python-collector/app/protocols/f1_educational.py`.
+3. Do not configure a commercial simulator to use this decoder.
 
 ---
 

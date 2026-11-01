@@ -79,6 +79,24 @@ export function runComparisonTests() {
     results.push({ name: 'Comparison Test B: Constant Offset Verification', passed: false, message: String(e) });
   }
 
+  // Known answer: 50 m/s vs 40 m/s over 200 m must take exactly 1 second longer.
+  try {
+    const ref = [createMockSample(0, 180, 0), createMockSample(200, 180, 4)];
+    const comp = [createMockSample(0, 144, 0), createMockSample(200, 144, 5)];
+    const outcome = compareLapsDistanceAligned(ref, comp, { spatialGridStepMeters: 30, maxInterpolationGapMeters: 300 });
+    results.push({ name: 'Comparison Test F: Trapezoidal Known Answer and Partial Final Grid Step', passed: outcome.canCompare && Math.abs(outcome.finalDeltaTimeSeconds - 1) < 1e-9 && outcome.commonCoverageMeters === 200, message: `Expected +1.000s over 200m, got ${outcome.finalDeltaTimeSeconds}s over ${outcome.commonCoverageMeters}m` });
+  } catch (e: unknown) {
+    results.push({ name: 'Comparison Test F: Trapezoidal Known Answer and Partial Final Grid Step', passed: false, message: String(e) });
+  }
+
+  try {
+    const lap = [createMockSample(0, 180, 0), createMockSample(250, 180, 5)];
+    const outcome = compareLapsDistanceAligned(lap, lap);
+    results.push({ name: 'Comparison Test G: No Full Delta Across Excluded Gap', passed: !outcome.canCompare && outcome.gapDetected && outcome.finalDeltaTimeSeconds === 0 });
+  } catch (e: unknown) {
+    results.push({ name: 'Comparison Test G: No Full Delta Across Excluded Gap', passed: false, message: String(e) });
+  }
+
   // Test C: Incomplete Overlapping Coverage
   try {
     const lapShort: TelemetrySample[] = [

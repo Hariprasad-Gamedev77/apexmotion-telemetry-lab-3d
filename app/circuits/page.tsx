@@ -1,7 +1,7 @@
 'use client';
 
 // APEX TELEMETRY 3D — Circuit Explorer & Circuit Data Universe (Daylight Motorsport Theme)
-// Displays verified circuits, layout versions, turn metadata, Sportmonks recent lap records, and signature Circuit Data Passports.
+// Displays a static circuit catalogue and generated demonstration geometry; source verification is pending.
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -61,20 +61,20 @@ export default function CircuitExplorerPage() {
     switchCircuit(circuit.circuitId);
     setDataMode(DATA_MODES.SYNTHETIC);
     setActiveSession({
-      id: `${circuit.circuitId}-gp`,
-      sessionKey: 9617,
-      meetingName: `${circuit.country} Grand Prix 2024`,
+      id: `synthetic-${circuit.circuitId}`,
+      sessionKey: 0,
+      meetingName: `${circuit.officialName} Synthetic Demo`,
       circuitName: circuit.officialName,
       country: circuit.country,
-      year: 2024,
-      sessionType: 'Race',
-      date: '2024-10-20',
-      totalLaps: 56,
+      year: 0,
+      sessionType: 'Synthetic Simulation',
+      date: '',
+      totalLaps: 0,
       trackLengthMeters: circuit.lengthMeters,
       dataMode: DATA_MODES.SYNTHETIC,
-      availableDrivers: [1, 4, 16, 81, 44],
-      hasCoordinateStream: true,
-      hasHighFrequencyTelemetry: true,
+      availableDrivers: [],
+      hasCoordinateStream: false,
+      hasHighFrequencyTelemetry: false,
       circuitPassport: circuit,
     });
     router.push('/dashboard');
@@ -94,7 +94,7 @@ export default function CircuitExplorerPage() {
             </h1>
           </div>
           <p className="text-xs font-mono text-[#64748B] mt-1">
-            24 verified Grand Prix circuits, turn classifications, coordinate transforms, and Sportmonks recent lap records
+            Static circuit catalogue with generated demo geometry; external sources, layouts and corner metadata are not independently verified
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export default function CircuitExplorerPage() {
         {/* Left: Circuit Directory Cards (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-3">
           <div className="text-[11px] font-mono font-bold text-[#64748B] uppercase tracking-wider px-1">
-            Verified Calendar Tracks ({filteredCircuits.length})
+            Catalogue Tracks ({filteredCircuits.length})
           </div>
 
           <div className="flex flex-col gap-2.5 max-h-[750px] overflow-y-auto pr-1">
@@ -208,7 +208,7 @@ export default function CircuitExplorerPage() {
               <div>
                 <div className="flex items-center gap-2 text-xs font-mono text-[#0284C7] font-bold">
                   <Shield size={14} />
-                  <span>FIA HOMOLOGATED CIRCUIT PASSPORT</span>
+                  <span>CIRCUIT CATALOGUE RECORD · SOURCE REVIEW PENDING</span>
                 </div>
                 <h2 className="text-xl font-black font-mono text-[#0F172A] mt-1">
                   {activePassport.officialName}
@@ -230,7 +230,7 @@ export default function CircuitExplorerPage() {
                 className="flex items-center gap-2 bg-[#0284C7] hover:bg-[#0369A1] text-white px-4 py-2.5 rounded-xl font-mono font-bold text-xs shadow-md transition-all active:scale-95"
               >
                 <Play size={14} fill="currentColor" />
-                <span>Launch 3D Track</span>
+                <span>Launch Illustrative Geometry</span>
               </button>
             </div>
 
@@ -267,11 +267,11 @@ export default function CircuitExplorerPage() {
                 <div className="text-xs font-black text-[#059669] mt-1.5 truncate">
                   {activePassport.qualityStatus}
                 </div>
-                <span className="text-[9px] text-[#64748B]">FIA Certified</span>
+                <span className="text-[9px] text-[#64748B]">Registry claim; not independently verified</span>
               </div>
             </div>
 
-            {/* Official Lap Records (From Sportmonks API & Formula-Timer) */}
+            {/* Static catalogue lap record values; external source is not currently attached. */}
             {activePassport.lapRecord && (
               <div className="bg-[#EFF6FF] border border-[#BAE6FD] rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -280,7 +280,7 @@ export default function CircuitExplorerPage() {
                   </div>
                   <div>
                     <span className="text-[10px] font-mono text-[#0284C7] font-bold uppercase tracking-wider">
-                      Official Lap Record
+                      Catalogue Lap Record · Unverified
                     </span>
                     <div className="flex items-baseline gap-2 mt-0.5">
                       <span className="text-lg font-black font-mono text-[#0F172A]">

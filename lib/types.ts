@@ -78,7 +78,7 @@ export interface DriverState {
   gapToLeader: string;
   interval: string;
   stintLaps: number;
-  tyreCompound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET';
+  tyreCompound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET' | 'UNKNOWN';
   visible: boolean;
   headshotUrl?: string | null;
 }
@@ -93,7 +93,7 @@ export interface LapSummary {
   valid: boolean;
   isPersonalBest: boolean;
   isSessionBest: boolean;
-  tyreCompound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET';
+  tyreCompound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET' | 'UNKNOWN';
   isPitOutLap?: boolean;
 }
 

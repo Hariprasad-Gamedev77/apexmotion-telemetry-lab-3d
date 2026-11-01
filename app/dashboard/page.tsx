@@ -37,7 +37,7 @@ const ApexScene = dynamic(() => import('@/components/three/ApexScene'), {
 });
 
 export default function DashboardPage() {
-  const { manualControl, setManualThrottle, setManualBrake } = useApexStore();
+  const { manualControl, setManualThrottle, setManualBrake, dataMode, activeSession } = useApexStore();
   const [showCharts, setShowCharts] = useState(true);
   const [chartViewMode, setChartViewMode] = useState<'split' | 'overlay'>('split');
   const [activeTab, setActiveTab] = useState<'hud' | 'sim' | 'adjust' | 'map'>('hud');
@@ -89,6 +89,13 @@ export default function DashboardPage() {
       {/* Upper Area: 3D Scene + Floating Control Dock */}
       <div className="relative flex-1 w-full min-h-0">
         <ApexScene />
+
+        {dataMode !== 'synthetic' && (
+          <div role="status" className="absolute bottom-4 left-4 z-20 max-w-xl rounded-xl border border-amber-300 bg-amber-50/95 px-4 py-3 text-xs font-mono text-amber-950 shadow-lg">
+            <strong>{dataMode === 'historical' ? `HISTORICAL SESSION METADATA · ${activeSession.meetingName}` : 'LIVE MODE · NO TELEMETRY SUBSCRIPTION'}</strong>
+            <div className="mt-1">This view does not have position telemetry for the selected source. The displayed circuit and vehicle geometry are synthetic.</div>
+          </div>
+        )}
 
         {/* Floating Workstation Capsule (Top Right) */}
         <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 w-84 max-h-[calc(100%-3rem)] overflow-y-auto">

@@ -63,13 +63,13 @@ export default function LapAnalysisPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col gap-1">
           <div className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
-            BEST SESSION LAP
+            DEMO BEST LAP (FIXTURE)
           </div>
           <div className="text-3xl font-black font-mono font-tabular text-purple-600 tracking-tight">
             1:21.942
           </div>
           <div className="text-[11px] font-mono font-bold text-emerald-600 flex items-center gap-1 mt-1 bg-emerald-50 px-2 py-0.5 rounded-full w-fit border border-emerald-200">
-            <Award size={12} /> VER • Lap 4
+            <Award size={12} /> SYNTHETIC REF • Lap 4
           </div>
         </div>
 

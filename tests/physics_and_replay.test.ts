@@ -63,5 +63,14 @@ export function runMathematicsTests() {
     results.push({ name: 'Longitudinal Vehicle Dynamics & RPM Step', passed: false, message: String(e) });
   }
 
+  try {
+    const sim = new VehicleSimulator(generateSyntheticCircuit(300));
+    let rejected = false;
+    try { sim.step(0); } catch { rejected = true; }
+    results.push({ name: 'Physics: Reject Invalid Integration Timestep', passed: rejected });
+  } catch (e: unknown) {
+    results.push({ name: 'Physics: Reject Invalid Integration Timestep', passed: false, message: String(e) });
+  }
+
   return results;
 }

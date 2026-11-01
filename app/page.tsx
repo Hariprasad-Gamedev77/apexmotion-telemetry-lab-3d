@@ -23,10 +23,11 @@ import { DATA_MODES } from '@/lib/constants';
 
 export default function HomePage() {
   const router = useRouter();
-  const { setDataMode } = useApexStore();
+  const { setDataMode, switchCircuit } = useApexStore();
 
   const handleStartDemo = () => {
     setDataMode(DATA_MODES.SYNTHETIC);
+    switchCircuit('singapore');
     router.push('/dashboard');
   };
 
@@ -68,7 +69,7 @@ export default function HomePage() {
           </div>
 
           <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-2xl font-sans">
-            A high-performance browser engineering workbench connecting real-time racing simulator UDP telemetry, historical Formula 1 GPS coordinates, synchronized 3D multi-car replays, and vehicle dynamics analysis.
+            A motorsport data workbench with a procedural synthetic demonstration, an OpenF1 session browser, and an educational UDP packet collector. Historical GPS replay and commercial simulator decoding are not currently verified.
           </p>
 
           {/* Core Action Callouts */}
@@ -146,7 +147,7 @@ export default function HomePage() {
                   Historical F1 Analysis
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Direct OpenF1 historical Grand Prix data ingestion. Real GPS coordinates, multi-driver lap progression, and synchronized telemetry traces.
+                  Browse session metadata returned by OpenF1. Telemetry and GPS channel coverage varies by session and is reported only when loaded.
                 </p>
               </div>
             </div>
@@ -170,7 +171,7 @@ export default function HomePage() {
                   Live Simulator Telemetry
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Python UDP packet collector with struct binary decoding (<code className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded text-[11px] font-mono">&lt;BBIf</code>). Real-time 60Hz WebSocket streaming bridge.
+                  Python collector for the project's educational packet fixture. Commercial simulator packet decoding and a fixed update rate are not supported claims.
                 </p>
               </div>
             </div>
@@ -217,7 +218,7 @@ export default function HomePage() {
             <ShieldCheck size={14} className="text-purple-600" />
           </div>
           <div className="text-base font-bold font-mono text-slate-800">Zod Validated</div>
-          <div className="text-[11px] font-mono font-medium text-purple-600">No Mixed Synthetic Data</div>
+          <div className="text-[11px] font-mono font-medium text-purple-600">Mode is not dataset provenance</div>
         </div>
       </div>
     </div>

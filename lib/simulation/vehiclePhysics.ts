@@ -61,6 +61,9 @@ export class VehicleSimulator {
    * Run a simulation step (dt in seconds, typically 0.016 to 0.05)
    */
   public step(dt: number, input?: VehiclePhysicsInput): TelemetrySample {
+    if (!Number.isFinite(dt) || dt <= 0 || dt > 0.25) {
+      throw new RangeError('Simulation timestep must be finite and within (0, 0.25] seconds.');
+    }
     const waypoints = this.circuit.waypoints;
     const totalLength = this.circuit.lengthMeters;
 
@@ -116,12 +119,9 @@ export class VehicleSimulator {
     const brakingForce = brake * maxBrakeForce;
 
     // DRS Zone Check from Circuit's actual DRS Zones
-    const isDrsZone = this.circuit.drsZones && this.circuit.drsZones.length > 0
-      ? this.circuit.drsZones.some(
-          (z) => this.currentDistance >= z.startDistance && this.currentDistance <= z.endDistance
-        )
-      : (this.currentDistance > 100 && this.currentDistance < 450) ||
-        (this.currentDistance > 2800 && this.currentDistance < 3700);
+    const isDrsZone = this.circuit.drsZones?.some(
+      (z) => this.currentDistance >= z.startDistance && this.currentDistance <= z.endDistance
+    ) ?? false;
 
     const drsActive = input?.drsInput !== undefined ? input.drsInput : (isDrsZone && throttle > 0.85);
     const effectiveCd = drsActive ? Cd * 0.74 : Cd;

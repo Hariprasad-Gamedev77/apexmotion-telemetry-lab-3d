@@ -8,7 +8,7 @@ import { Cpu, CheckCircle2, ShieldCheck, Activity } from 'lucide-react';
 import { useApexStore } from '@/lib/store';
 
 export default function DiagnosticsPage() {
-  const { diagnostics, dataMode } = useApexStore();
+  const { diagnostics, dataMode, wsConnected, telemetryHistory } = useApexStore();
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto flex flex-col gap-6 select-none">
@@ -21,7 +21,7 @@ export default function DiagnosticsPage() {
             SYSTEM DIAGNOSTICS & TELEMETRY HEALTH
           </h1>
           <p className="text-xs font-mono font-medium text-slate-500 mt-0.5">
-            Engine subsystem verification, frame rates, and WebSocket bridge status
+            Collector metrics are shown only when reported; rendering performance is not instrumented
           </p>
         </div>
       </div>
@@ -32,9 +32,9 @@ export default function DiagnosticsPage() {
             <span>RENDER WORKER</span>
             <Activity size={16} className="text-sky-600" />
           </div>
-          <div className="text-2xl font-black font-mono text-slate-900">60.0 FPS Nominal</div>
+          <div className="text-2xl font-black font-mono text-slate-900">Not measured</div>
           <div className="text-xs font-mono font-semibold text-emerald-600 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 w-fit">
-            <CheckCircle2 size={13} /> WebGL 2.0 Hardware Accelerated
+            <CheckCircle2 size={13} /> {dataMode === 'synthetic' ? 'Synthetic mode selected' : 'GPU capability unverified'}
           </div>
         </div>
 
@@ -43,9 +43,9 @@ export default function DiagnosticsPage() {
             <span>PHYSICS INTEGRATION</span>
             <Cpu size={16} className="text-emerald-600" />
           </div>
-          <div className="text-2xl font-black font-mono text-slate-900">Semi-Implicit Euler</div>
+          <div className="text-2xl font-black font-mono text-slate-900">{diagnostics.packetsReceived} packets received</div>
           <div className="text-xs font-mono font-semibold text-emerald-600 flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 w-fit">
-            <CheckCircle2 size={13} /> Curvature & Traction Bounded
+            <CheckCircle2 size={13} /> {wsConnected ? 'WebSocket open' : 'WebSocket disconnected'}
           </div>
         </div>
 
@@ -54,9 +54,9 @@ export default function DiagnosticsPage() {
             <span>MEMORY BUFFER</span>
             <ShieldCheck size={16} className="text-purple-600" />
           </div>
-          <div className="text-2xl font-black font-mono text-slate-900">3,000 Samples Max</div>
+          <div className="text-2xl font-black font-mono text-slate-900">{telemetryHistory.length} samples in view</div>
           <div className="text-xs font-mono font-semibold text-purple-700 flex items-center gap-1.5 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200 w-fit">
-            <CheckCircle2 size={13} /> Ring Buffer Protected
+            <CheckCircle2 size={13} /> Collector packet rate: {diagnostics.estimatedPacketRateHz.toFixed(1)} Hz
           </div>
         </div>
       </div>

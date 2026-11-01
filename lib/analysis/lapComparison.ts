@@ -74,6 +74,29 @@ export function compareLapsDistanceAligned(
     };
   }
 
+  if (!Number.isFinite(cfg.spatialGridStepMeters) || cfg.spatialGridStepMeters <= 0 ||
+      !Number.isFinite(cfg.maxInterpolationGapMeters) || cfg.maxInterpolationGapMeters <= 0) {
+    return {
+      canCompare: false, alignmentMethod: 'distance', overlapStart: 0, overlapEnd: 0,
+      commonCoverageMeters: 0, finalDeltaTimeSeconds: 0, maxSpeedDeltaKph: 0,
+      meanSpeedDeltaKph: 0, gapDetected: false,
+      warnings: ['Comparison grid step and interpolation gap must be finite positive distances.'], points: [],
+    };
+  }
+
+  // Inputs must be ordered by distance; binary-search interpolation is invalid otherwise.
+  const ordered = (samples: TelemetrySample[]) => samples.every((sample, index) =>
+    Number.isFinite(sample.distanceMeters) && Number.isFinite(sample.timestamp) &&
+    Number.isFinite(sample.speedKph) && (index === 0 || sample.distanceMeters > samples[index - 1].distanceMeters));
+  if (!ordered(refLap) || !ordered(compLap)) {
+    return {
+      canCompare: false, alignmentMethod: 'distance', overlapStart: 0, overlapEnd: 0,
+      commonCoverageMeters: 0, finalDeltaTimeSeconds: 0, maxSpeedDeltaKph: 0,
+      meanSpeedDeltaKph: 0, gapDetected: false,
+      warnings: ['Each lap must contain finite samples ordered by strictly increasing distance.'], points: [],
+    };
+  }
+
   // Determine common spatial interval
   const refMinDist = refLap[0].distanceMeters;
   const refMaxDist = refLap[refLap.length - 1].distanceMeters;
@@ -171,8 +194,13 @@ export function compareLapsDistanceAligned(
   let pointsCount = 0;
 
   const step = cfg.spatialGridStepMeters;
+  const grid: number[] = [];
+  for (let dist = overlapStart; dist < overlapEnd; dist += step) grid.push(dist);
+  if (grid.length === 0 || grid[grid.length - 1] !== overlapEnd) grid.push(overlapEnd);
+  let previous: { dist: number; ref: TelemetrySample; comp: TelemetrySample } | undefined;
+  let validDistance = 0;
 
-  for (let dist = overlapStart; dist <= overlapEnd; dist += step) {
+  for (const dist of grid) {
     const refResult = interpolateAtDistance(refLap, dist);
     const compResult = interpolateAtDistance(compLap, dist);
 
@@ -180,22 +208,36 @@ export function compareLapsDistanceAligned(
 
     if (refResult.gapExceeded || compResult.gapExceeded) {
       gapDetected = true;
-      warnings.push(`Interpolation prohibited across large sampling gap at distance ${dist}m.`);
+      const warning = 'Interpolation prohibited across one or more large sampling gaps; affected regions are excluded.';
+      if (!warnings.includes(warning)) warnings.push(warning);
+      previous = undefined;
       continue;
     }
 
     const r = refResult.sample;
     const c = compResult.sample;
 
-    // Convert speed to m/s for integration: v_ms = speedKph / 3.6
-    // Minimum 2 m/s floor to prevent numerical zero division
-    const vRefMs = Math.max(2.0, r.speedKph / 3.6);
-    const vCompMs = Math.max(2.0, c.speedKph / 3.6);
+    if (r.speedKph <= 0 || c.speedKph <= 0) {
+      warnings.push(`Time delta excluded at ${dist.toFixed(1)}m because a lap has zero or negative speed.`);
+      previous = undefined;
+      gapDetected = true;
+      continue;
+    }
 
-    // Delta time step: dt = dx/v_comp - dx/v_ref
-    // Positive dt means comp is slower than ref
-    const dtStep = (step / vCompMs) - (step / vRefMs);
-    cumulativeDeltaSeconds += dtStep;
+    // Integrate reciprocal speed over the actual distance interval using trapezoids.
+    // A missing/invalid interval breaks continuity; do not bridge it or report a full-lap delta.
+    if (previous) {
+      const dx = dist - previous.dist;
+      if (dx > cfg.maxInterpolationGapMeters) {
+        gapDetected = true;
+      } else {
+        const invComp = 0.5 * (3.6 / previous.comp.speedKph + 3.6 / c.speedKph);
+        const invRef = 0.5 * (3.6 / previous.ref.speedKph + 3.6 / r.speedKph);
+        cumulativeDeltaSeconds += dx * (invComp - invRef);
+        validDistance += dx;
+      }
+    }
+    previous = { dist, ref: r, comp: c };
 
     const deltaV = c.speedKph - r.speedKph;
     maxDeltaKph = Math.max(maxDeltaKph, Math.abs(deltaV));
@@ -217,12 +259,13 @@ export function compareLapsDistanceAligned(
     });
   }
 
+  if (validDistance === 0) warnings.push('No continuous valid distance remains for time-delta integration.');
   return {
-    canCompare: alignedPoints.length >= 2,
+    canCompare: alignedPoints.length >= 2 && validDistance > 0,
     alignmentMethod: 'distance',
     overlapStart,
     overlapEnd,
-    commonCoverageMeters: overlapEnd - overlapStart,
+    commonCoverageMeters: validDistance,
     finalDeltaTimeSeconds: parseFloat(cumulativeDeltaSeconds.toFixed(3)),
     maxSpeedDeltaKph: parseFloat(maxDeltaKph.toFixed(1)),
     meanSpeedDeltaKph: pointsCount > 0 ? parseFloat((sumDeltaKph / pointsCount).toFixed(1)) : 0,

@@ -146,6 +146,18 @@ export function validateAndParseTelemetryCSV(csvContent: string): ValidationRepo
   const colLongG = findCol('longitudinalg', 'longg', 'ax');
   const colLatG = findCol('lateralg', 'latg', 'ay');
 
+  const optionalChannels: Array<[string, number | undefined]> = [
+    ['throttlePercent', colThrottle], ['brakePercent', colBrake], ['distanceMeters', colDistance],
+    ['gear', colGear], ['rpm', colRpm], ['drs', colDrs], ['steeringAngleDeg', colSteer],
+    ['longitudinalG', colLongG], ['lateralG', colLatG],
+  ];
+  for (const [name, index] of optionalChannels) {
+    if (index === undefined) issues.push({
+      severity: 'WARNING', code: 'CHANNEL_UNAVAILABLE_DEFAULTED', column: name,
+      message: `Channel '${name}' is absent. A placeholder is used in the playback sample; this channel is not measured data.`,
+    });
+  }
+
   if (colTime === undefined) {
     issues.push({
       severity: 'ERROR',
@@ -201,10 +213,13 @@ export function validateAndParseTelemetryCSV(csvContent: string): ValidationRepo
     const parseNum = (colIdx: number | undefined, name: string): number | null => {
       if (colIdx === undefined) return null;
       const rawVal = cells[colIdx];
-      if (rawVal === undefined || rawVal === '' || rawVal.toLowerCase() === 'null') return null;
+      if (rawVal === undefined || rawVal.trim() === '' || rawVal.toLowerCase() === 'null') {
+        issues.push({ severity: 'WARNING', code: 'MISSING_VALUE', message: `Missing value in column '${name}' at row ${rowIdx}.`, row: rowIdx, column: name });
+        return null;
+      }
 
-      const val = parseFloat(rawVal);
-      if (isNaN(val)) {
+      const val = Number(rawVal);
+      if (rawVal.trim() === '' || Number.isNaN(val)) {
         issues.push({
           severity: 'WARNING',
           code: 'NAN_VALUE',
@@ -282,13 +297,17 @@ export function validateAndParseTelemetryCSV(csvContent: string): ValidationRepo
     if (throttle <= 1.0 && throttle > 0.0 && !rawHeaders[colThrottle ?? 0]?.includes('%')) {
       throttle = throttle * 100;
     }
-    throttle = Math.max(0, Math.min(100, throttle));
+    if (throttle < 0 || throttle > 100) {
+      issues.push({ severity: 'WARNING', code: 'OUT_OF_RANGE_CHANNEL', message: `Throttle ${throttle} at row ${rowIdx} is outside 0-100%; original value retained.`, row: rowIdx, column: 'throttlePercent', value: throttle });
+    }
 
     let brake = parseNum(colBrake, 'brakePercent') ?? 0;
     if (brake <= 1.0 && brake > 0.0 && !rawHeaders[colBrake ?? 0]?.includes('%')) {
       brake = brake * 100;
     }
-    brake = Math.max(0, Math.min(100, brake));
+    if (brake < 0 || brake > 100) {
+      issues.push({ severity: 'WARNING', code: 'OUT_OF_RANGE_CHANNEL', message: `Brake ${brake} at row ${rowIdx} is outside 0-100%; original value retained.`, row: rowIdx, column: 'brakePercent', value: brake });
+    }
 
     // Distance calculation
     let dist = parseNum(colDistance, 'distanceMeters');
@@ -319,11 +338,11 @@ export function validateAndParseTelemetryCSV(csvContent: string): ValidationRepo
     validSamples.push({
       timestamp: t,
       distanceMeters: dist,
-      speedKph: Math.max(0, speed),
+      speedKph: speed,
       throttlePercent: throttle,
       brakePercent: brake,
-      gear: Math.max(0, Math.min(8, gear)),
-      rpm: Math.max(0, rpm),
+      gear,
+      rpm,
       drs: drs > 0 ? 1 : 0,
       steeringAngleDeg: steer,
       longitudinalG: longG,

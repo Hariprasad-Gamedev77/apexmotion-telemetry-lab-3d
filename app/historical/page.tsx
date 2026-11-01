@@ -1,7 +1,7 @@
 'use client';
 
 // APEX TELEMETRY 3D — OpenF1 Historical Grand Prix & Session Explorer
-// Authenticated season browsing, session discovery, and full analytical loading.
+// OpenF1 session metadata browsing and limited session-record loading.
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,7 +9,6 @@ import { useApexStore } from '@/lib/store';
 import {
   fetchHistoricalMeetings,
   fetchMeetingSessions,
-  CURATED_HISTORICAL_SESSIONS,
 } from '@/lib/api/openf1';
 import type { Meeting, SessionMetadata } from '@/lib/types';
 import {
@@ -35,11 +34,14 @@ export default function HistoricalExplorerPage() {
   const [loadingMeetings, setLoadingMeetings] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [loadingSessionKey, setLoadingSessionKey] = useState<number | null>(null);
+  const [meetingsError, setMeetingsError] = useState('');
+  const [sessionsError, setSessionsError] = useState('');
 
   useEffect(() => {
     let mounted = true;
     async function loadMeetings() {
       setLoadingMeetings(true);
+      setMeetingsError('');
       try {
         const fetched = await fetchHistoricalMeetings(selectedYear);
         if (mounted) {
@@ -49,6 +51,12 @@ export default function HistoricalExplorerPage() {
             const austin = fetched.find((m) => m.meetingName.includes('United States') || m.location.includes('Austin'));
             setSelectedMeetingKey(austin ? austin.meetingKey : fetched[0].meetingKey);
           }
+          if (fetched.length === 0) setMeetingsError('No meeting records were returned. Check the provider connection or selected season.');
+        }
+      } catch {
+        if (mounted) {
+          setMeetings([]);
+          setMeetingsError('OpenF1 could not be reached. Historical data was not substituted.');
         }
       } finally {
         if (mounted) setLoadingMeetings(false);
@@ -65,10 +73,17 @@ export default function HistoricalExplorerPage() {
     async function loadSessions() {
       if (!selectedMeetingKey) return;
       setLoadingSessions(true);
+      setSessionsError('');
       try {
         const fetched = await fetchMeetingSessions(selectedMeetingKey);
         if (mounted) {
-          setSessions(fetched.length > 0 ? fetched : CURATED_HISTORICAL_SESSIONS);
+          setSessions(fetched);
+          if (fetched.length === 0) setSessionsError('No sessions were returned for this meeting.');
+        }
+      } catch {
+        if (mounted) {
+          setSessions([]);
+          setSessionsError('OpenF1 could not return sessions. No fixture sessions were substituted.');
         }
       } finally {
         if (mounted) setLoadingSessions(false);
@@ -106,7 +121,7 @@ export default function HistoricalExplorerPage() {
             </h1>
           </div>
           <p className="text-xs font-mono text-[#9AA9BA] mt-1">
-            Browse authenticated Formula 1 Grand Prix sessions, driver rosters, and pit strategy via OpenF1
+            Browse session records returned by the OpenF1 public API; availability varies by season and session
           </p>
         </div>
 
@@ -137,6 +152,7 @@ export default function HistoricalExplorerPage() {
               {selectedYear} Grand Prix Events ({meetings.length})
             </span>
             {loadingMeetings && <Loader2 size={13} className="text-[#F4BD62] animate-spin" />}
+            {meetingsError && <p role="status" className="text-xs text-amber-700">{meetingsError}</p>}
           </div>
 
           <div className="flex flex-col gap-2 max-h-[680px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#293544]">
@@ -193,7 +209,7 @@ export default function HistoricalExplorerPage() {
                     ROUND SELECTION
                   </span>
                   <span className="text-[9px] font-mono bg-[#65D6A3]/15 text-[#65D6A3] border border-[#65D6A3]/30 px-2 py-0.5 rounded-full font-bold">
-                    VERIFIED OPENF1
+                    OPENF1 PROVIDER
                   </span>
                 </div>
                 <h2 className="text-lg font-bold font-mono text-[#F2F6FA] mt-1">
@@ -209,8 +225,9 @@ export default function HistoricalExplorerPage() {
           {/* Sessions List */}
           <div className="flex flex-col gap-3">
             <div className="text-[11px] font-mono font-bold text-[#9AA9BA] uppercase tracking-wider flex items-center justify-between px-1">
-              <span>Official Weekend Sessions</span>
+              <span>Provider Sessions</span>
               {loadingSessions && <Loader2 size={13} className="text-[#58D9F7] animate-spin" />}
+              {sessionsError && <p role="status" className="text-xs text-amber-700">{sessionsError}</p>}
             </div>
 
             <div className="flex flex-col gap-3">

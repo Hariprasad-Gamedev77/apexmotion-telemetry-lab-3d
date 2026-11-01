@@ -127,16 +127,16 @@ function buildGridDrivers(circuit: GeneratedCircuit): DriverState[] {
     color: string;
     compound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET';
   }> = [
-    { num: 1, code: 'VER', name: 'Max Verstappen', team: 'Red Bull Racing', color: '#1E40AF', compound: 'MEDIUM' },
-    { num: 4, code: 'NOR', name: 'Lando Norris', team: 'McLaren', color: '#EA580C', compound: 'MEDIUM' },
-    { num: 16, code: 'LEC', name: 'Charles Leclerc', team: 'Ferrari', color: '#DC2626', compound: 'HARD' },
-    { num: 81, code: 'PIA', name: 'Oscar Piastri', team: 'McLaren', color: '#EA580C', compound: 'HARD' },
-    { num: 44, code: 'HAM', name: 'Lewis Hamilton', team: 'Mercedes-AMG', color: '#0D9488', compound: 'HARD' },
-    { num: 63, code: 'RUS', name: 'George Russell', team: 'Mercedes-AMG', color: '#14B8A6', compound: 'MEDIUM' },
-    { num: 55, code: 'SAI', name: 'Carlos Sainz', team: 'Ferrari', color: '#E11D48', compound: 'MEDIUM' },
-    { num: 11, code: 'PER', name: 'Sergio Perez', team: 'Red Bull Racing', color: '#1D4ED8', compound: 'HARD' },
-    { num: 14, code: 'ALO', name: 'Fernando Alonso', team: 'Aston Martin', color: '#047857', compound: 'MEDIUM' },
-    { num: 27, code: 'HUL', name: 'Nico Hulkenberg', team: 'Haas F1', color: '#64748B', compound: 'HARD' },
+    { num: 1, code: 'CAR01', name: 'Demo Car 01', team: 'Synthetic Demo', color: '#1E40AF', compound: 'MEDIUM' },
+    { num: 2, code: 'CAR02', name: 'Demo Car 02', team: 'Synthetic Demo', color: '#EA580C', compound: 'MEDIUM' },
+    { num: 3, code: 'CAR03', name: 'Demo Car 03', team: 'Synthetic Demo', color: '#DC2626', compound: 'HARD' },
+    { num: 4, code: 'CAR04', name: 'Demo Car 04', team: 'Synthetic Demo', color: '#8B5CF6', compound: 'HARD' },
+    { num: 5, code: 'CAR05', name: 'Demo Car 05', team: 'Synthetic Demo', color: '#0D9488', compound: 'HARD' },
+    { num: 6, code: 'CAR06', name: 'Demo Car 06', team: 'Synthetic Demo', color: '#14B8A6', compound: 'MEDIUM' },
+    { num: 7, code: 'CAR07', name: 'Demo Car 07', team: 'Synthetic Demo', color: '#E11D48', compound: 'MEDIUM' },
+    { num: 8, code: 'CAR08', name: 'Demo Car 08', team: 'Synthetic Demo', color: '#1D4ED8', compound: 'HARD' },
+    { num: 9, code: 'CAR09', name: 'Demo Car 09', team: 'Synthetic Demo', color: '#047857', compound: 'MEDIUM' },
+    { num: 10, code: 'CAR10', name: 'Demo Car 10', team: 'Synthetic Demo', color: '#64748B', compound: 'HARD' },
   ];
 
   return roster.map((item, index) => {
@@ -205,21 +205,21 @@ const defaultDrivers = buildGridDrivers(initialCircuit);
 const initialTelemetry = defaultDrivers[0].telemetry;
 
 const defaultSession: SessionMetadata = {
-  id: 'singapore-marina-bay-gp',
-  sessionKey: 9620,
-  meetingKey: 1245,
-  meetingName: 'Singapore Grand Prix 2024',
+  id: 'synthetic-singapore-demo',
+  sessionKey: 0,
+  meetingKey: undefined,
+  meetingName: 'Synthetic Demonstration',
   circuitName: 'Marina Bay Street Circuit',
   country: 'Singapore',
-  year: 2024,
-  sessionType: 'Race',
-  date: '2024-09-22',
-  totalLaps: 62,
+  year: 0,
+  sessionType: 'Synthetic Simulation',
+  date: '',
+  totalLaps: 0,
   trackLengthMeters: initialCircuit.lengthMeters,
   dataMode: DATA_MODES.SYNTHETIC,
-  availableDrivers: [1, 4, 16, 81, 44],
-  hasCoordinateStream: true,
-  hasHighFrequencyTelemetry: true,
+  availableDrivers: [],
+  hasCoordinateStream: false,
+  hasHighFrequencyTelemetry: false,
   circuitPassport: VERIFIED_CIRCUITS.singapore,
 };
 
@@ -242,11 +242,15 @@ const defaultTrackSettings: TrackAdjustmentSettings = {
 
 export const useApexStore = create<ApexAppState>((set, get) => ({
   dataMode: DATA_MODES.SYNTHETIC,
-  setDataMode: (mode) => set({ dataMode: mode }),
+  setDataMode: (mode) => set({
+    dataMode: mode,
+    isSimulating: mode === DATA_MODES.SYNTHETIC,
+    isPlaying: mode === DATA_MODES.SYNTHETIC,
+  }),
 
-  selectedYear: 2024,
+  selectedYear: 0,
   setSelectedYear: (selectedYear) => set({ selectedYear }),
-  selectedMeetingKey: 1245,
+  selectedMeetingKey: null,
   setSelectedMeetingKey: (selectedMeetingKey) => set({ selectedMeetingKey }),
   activeSession: defaultSession,
   setActiveSession: (activeSession) => set({ activeSession }),
@@ -266,6 +270,13 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
       dataMode: DATA_MODES.HISTORICAL,
       selectedMeetingKey: session.meetingKey || null,
       selectedYear: session.year,
+      drivers: [],
+      telemetryHistory: [],
+      currentTelemetry: initialTelemetry,
+      duration: 0,
+      currentTime: 0,
+      isPlaying: false,
+      isSimulating: false,
     });
 
     // Match circuit
@@ -282,6 +293,22 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
       get().switchCircuit('monza');
     }
 
+    // switchCircuit prepares synthetic data; restore the selected historical identity
+    // while keeping its replay stopped and its telemetry empty.
+    set({
+      activeSession: session,
+      dataMode: DATA_MODES.HISTORICAL,
+      selectedMeetingKey: session.meetingKey || null,
+      selectedYear: session.year,
+      drivers: [],
+      telemetryHistory: [],
+      currentTelemetry: initialTelemetry,
+      duration: 0,
+      currentTime: 0,
+      isPlaying: false,
+      isSimulating: false,
+    });
+
     try {
       const [drivers, laps, pitStops, stints] = await Promise.all([
         fetchSessionDrivers(session.sessionKey),
@@ -291,50 +318,23 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
       ]);
 
       set((state) => {
-        // Convert to driver state list with distinct positions along circuit
-        const circuitLen = state.circuit.lengthMeters;
-        const mappedDrivers: DriverState[] = drivers.slice(0, 10).map((d, index) => {
-          const distanceOffset = (circuitLen - index * 120) % circuitLen;
-          const wpIdx = Math.floor((distanceOffset / circuitLen) * state.circuit.waypoints.length) % state.circuit.waypoints.length;
-          const wp = state.circuit.waypoints[wpIdx] || state.circuit.waypoints[0];
-
-          return {
-            driverNumber: d.driverNumber,
-            code: d.nameAcronym,
-            name: d.fullName,
-            team: d.teamName,
-            color: d.teamColour,
-            currentPosition: index + 1,
-            lapNumber: 1,
-            lapProgress: distanceOffset / circuitLen,
-            telemetry: {
-              ...initialTelemetry,
-              distanceMeters: distanceOffset,
-              worldX: wp.x,
-              worldY: wp.y,
-              worldZ: wp.z,
-              heading: wp.heading,
-              speedKph: wp.speedLimitKph,
-            },
-            lastLapTime: null,
-            bestLapTime: null,
-            gapToLeader: index === 0 ? 'LEADER' : `+${(index * 1.4).toFixed(3)}s`,
-            interval: index === 0 ? '-' : `+1.400s`,
-            stintLaps: 1,
-            tyreCompound: 'MEDIUM',
-            visible: true,
-            headshotUrl: d.headshotUrl,
-          };
-        });
-
         return {
+          dataMode: DATA_MODES.HISTORICAL,
           sessionDrivers: drivers,
           availableLaps: laps,
           sessionPitStops: pitStops,
           sessionStints: stints,
-          drivers: mappedDrivers.length > 0 ? mappedDrivers : state.drivers,
-          selectedDriverNumber: mappedDrivers[0]?.driverNumber || state.selectedDriverNumber,
-          comparisonDriverNumber: mappedDrivers[1]?.driverNumber || null,
+          // Roster metadata is not position telemetry. Clear synthetic grid cars and traces
+          // until actual location/speed samples have been fetched for this session.
+          drivers: [],
+          telemetryHistory: [],
+          currentTelemetry: initialTelemetry,
+          duration: 0,
+          currentTime: 0,
+          isPlaying: false,
+          isSimulating: false,
+          selectedDriverNumber: drivers[0]?.driverNumber ?? state.selectedDriverNumber,
+          comparisonDriverNumber: drivers[1]?.driverNumber ?? null,
         };
       });
     } catch (err) {
@@ -365,15 +365,39 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
     const firstSample = newLapHistory[0] || initialTelemetry;
     const newDrivers = buildGridDrivers(newCircuit);
 
-    set((state) => ({
+    set(() => ({
+      dataMode: DATA_MODES.SYNTHETIC,
+      isSimulating: true,
+      isPlaying: true,
       circuit: newCircuit,
       duration: expectedDuration,
       currentTime: 0,
+      selectedDriverNumber: 1,
+      comparisonDriverNumber: 2,
       currentTelemetry: firstSample,
       telemetryHistory: newLapHistory,
       drivers: newDrivers,
+      sessionDrivers: [],
+      availableLaps: [],
+      sessionPitStops: [],
+      sessionStints: [],
+      driverLocations: {},
+      selectedMeetingKey: null,
+      selectedYear: 0,
       activeSession: {
-        ...state.activeSession,
+        ...defaultSession,
+        id: `synthetic-${newCircuit.id}`,
+        meetingName: `${newCircuit.name} Synthetic Demo`,
+        sessionKey: 0,
+        meetingKey: undefined,
+        year: 0,
+        date: '',
+        totalLaps: 0,
+        dataMode: DATA_MODES.SYNTHETIC,
+        availableDrivers: [],
+        hasCoordinateStream: false,
+        hasHighFrequencyTelemetry: false,
+        circuitPassport: VERIFIED_CIRCUITS[circuitId],
         circuitName: newCircuit.name,
         country: newCircuit.country,
         trackLengthMeters: newCircuit.lengthMeters,
@@ -396,6 +420,7 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
 
   setCurrentTime: (currentTime) => {
+    if (get().dataMode !== DATA_MODES.SYNTHETIC) return;
     const { simulator, duration, circuit } = get();
     const boundedTime = Math.max(0, Math.min(duration, currentTime));
     const sample = simulator.seekToTime(boundedTime, duration);
@@ -421,6 +446,7 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
   },
 
   seekToDistance: (distanceMeters) => {
+    if (get().dataMode !== DATA_MODES.SYNTHETIC) return;
     const { simulator, duration, circuit } = get();
     const sample = simulator.seekToDistance(distanceMeters);
     const time = (sample.distanceMeters / circuit.lengthMeters) * duration;
@@ -483,17 +509,17 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
     }),
 
   diagnostics: {
-    receiverState: 'listening',
+    receiverState: 'idle',
     bindAddress: '127.0.0.1',
     port: 20777,
-    packetsReceived: 48920,
-    packetsDecoded: 48918,
-    packetsDropped: 2,
+    packetsReceived: 0,
+    packetsDecoded: 0,
+    packetsDropped: 0,
     invalidPackets: 0,
     unknownPackets: 0,
-    estimatedPacketRateHz: 60.2,
-    lastPacketTimestamp: new Date().toISOString(),
-    connectedClients: 1,
+    estimatedPacketRateHz: 0,
+    lastPacketTimestamp: '',
+    connectedClients: 0,
     recordingActive: false,
     recordedBytes: 0,
   },
@@ -502,8 +528,8 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
   setWsConnected: (wsConnected) => set({ wsConnected }),
 
   tickSimulation: (dt) => {
-    const { simulator, manualControl, manualThrottle, manualBrake, playbackSpeed, isPlaying, circuit } = get();
-    if (!isPlaying) return;
+    const { simulator, manualControl, manualThrottle, manualBrake, playbackSpeed, isPlaying, isSimulating, circuit } = get();
+    if (!isPlaying || !isSimulating) return;
 
     const effectiveDt = dt * playbackSpeed;
     const sample = simulator.step(effectiveDt, {

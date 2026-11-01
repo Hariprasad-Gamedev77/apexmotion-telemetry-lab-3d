@@ -96,5 +96,21 @@ export function runValidationTests() {
     results.push({ name: 'Validation: Semicolon Delimiter Auto-Detection', passed: false, message: String(e) });
   }
 
+  try {
+    const report = validateAndParseTelemetryCSV('timestamp,speedKph,throttlePercent\n0,200,125\n0.1,201,100');
+    const retained = report.samples[0]?.throttlePercent === 125;
+    const disclosed = report.issues.some((i) => i.code === 'OUT_OF_RANGE_CHANNEL') && report.issues.some((i) => i.code === 'CHANNEL_UNAVAILABLE_DEFAULTED' && i.column === 'brakePercent');
+    results.push({ name: 'Validation: Preserve Out-of-Range Input and Disclose Missing Channel', passed: retained && disclosed });
+  } catch (e: unknown) {
+    results.push({ name: 'Validation: Preserve Out-of-Range Input and Disclose Missing Channel', passed: false, message: String(e) });
+  }
+
+  try {
+    const report = validateAndParseTelemetryCSV('timestamp,speedKph\n0,200kmh\n0.1,201');
+    results.push({ name: 'Validation: Reject Numeric Prefix Parsing', passed: !report.isValid && report.issues.some((i) => i.code === 'NAN_VALUE') });
+  } catch (e: unknown) {
+    results.push({ name: 'Validation: Reject Numeric Prefix Parsing', passed: false, message: String(e) });
+  }
+
   return results;
 }

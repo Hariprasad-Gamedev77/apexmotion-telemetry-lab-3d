@@ -34,12 +34,12 @@ export default function RaceStrategyPage() {
   const { activeSession } = useApexStore();
   const totalLaps = activeSession.totalLaps || 56;
 
-  // Real Austin 2024 GP Stint Data
+  // Fixed illustrative strategy fixture; this is not loaded from the selected session.
   const driverStrategies: StintBar[] = [
     {
-      driver: 'Charles Leclerc (P1)',
-      driverNumber: 16,
-      team: 'Ferrari',
+      driver: 'Demo Car A',
+      driverNumber: 1,
+      team: 'Synthetic Demo',
       teamColor: '#DC2626',
       stints: [
         { stintNumber: 1, compound: 'MEDIUM', startLap: 1, endLap: 26, lapsCount: 26, tyreAgeAtStart: 0 },
@@ -47,9 +47,9 @@ export default function RaceStrategyPage() {
       ],
     },
     {
-      driver: 'Carlos Sainz (P2)',
-      driverNumber: 55,
-      team: 'Ferrari',
+      driver: 'Demo Car B',
+      driverNumber: 2,
+      team: 'Synthetic Demo',
       teamColor: '#E11D48',
       stints: [
         { stintNumber: 1, compound: 'MEDIUM', startLap: 1, endLap: 21, lapsCount: 21, tyreAgeAtStart: 0 },
@@ -57,9 +57,9 @@ export default function RaceStrategyPage() {
       ],
     },
     {
-      driver: 'Max Verstappen (P3)',
-      driverNumber: 1,
-      team: 'Red Bull Racing',
+      driver: 'Demo Car C',
+      driverNumber: 3,
+      team: 'Synthetic Demo',
       teamColor: '#1E40AF',
       stints: [
         { stintNumber: 1, compound: 'MEDIUM', startLap: 1, endLap: 25, lapsCount: 25, tyreAgeAtStart: 0 },
@@ -67,9 +67,9 @@ export default function RaceStrategyPage() {
       ],
     },
     {
-      driver: 'Lando Norris (P4)',
+      driver: 'Demo Car D',
       driverNumber: 4,
-      team: 'McLaren',
+      team: 'Synthetic Demo',
       teamColor: '#EA580C',
       stints: [
         { stintNumber: 1, compound: 'MEDIUM', startLap: 1, endLap: 31, lapsCount: 31, tyreAgeAtStart: 0 },
@@ -77,9 +77,9 @@ export default function RaceStrategyPage() {
       ],
     },
     {
-      driver: 'Oscar Piastri (P5)',
-      driverNumber: 81,
-      team: 'McLaren',
+      driver: 'Demo Car E',
+      driverNumber: 5,
+      team: 'Synthetic Demo',
       teamColor: '#F59E0B',
       stints: [
         { stintNumber: 1, compound: 'MEDIUM', startLap: 1, endLap: 32, lapsCount: 32, tyreAgeAtStart: 0 },
@@ -102,7 +102,7 @@ export default function RaceStrategyPage() {
                 RACE TYRE STRATEGY & STINTS
               </h1>
               <p className="text-xs font-mono text-[#64748B] mt-0.5">
-                {activeSession.meetingName} • Pirelli compound allocation timeline across {totalLaps} laps
+                DEMO FIXTURE • Example allocation across {totalLaps} laps; not session data
               </p>
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function RaceStrategyPage() {
             </h3>
           </div>
           <span className="text-[10px] font-mono text-[#047857] bg-[#D1FAE5] px-2 py-0.5 rounded border border-[#A7F3D0] font-semibold">
-            OFFICIAL STINT DATA
+            SYNTHETIC STRATEGY FIXTURE
           </span>
         </div>
 
@@ -204,7 +204,7 @@ export default function RaceStrategyPage() {
             <span>Scientifically Defensible Tyre Degradation Methodology</span>
           </div>
           <p className="text-[11px] text-[#64748B] leading-relaxed">
-            In compliance with motorsport engineering rigor, tyre degradation rates are evaluated via multivariable linear regression across clean, uninterrupted green-flag laps ($R^2 &gt; 0.78$), isolating fuel burn-off (~0.06s/lap) and track rubbering. Arbitrary fixed constants (e.g. &quot;Soft loses 0.12s/lap&quot;) are prohibited.
+            No stint or degradation data is loaded from the selected session on this page. The strategy bars above are illustrative fixtures and must not be interpreted as recorded race results.
           </p>
         </div>
       </div>

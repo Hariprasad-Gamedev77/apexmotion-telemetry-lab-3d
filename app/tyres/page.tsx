@@ -24,14 +24,14 @@ export default function TyresPage() {
             </h1>
           </div>
           <p className="text-xs font-mono font-medium text-slate-500 mt-1">
-            Compound allocation, stint durations & pace degradation models
+            Synthetic grid compounds only; no measured stint or degradation dataset is loaded
           </p>
         </div>
 
         {/* Engineering Integrity Notice */}
         <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-full shadow-xs">
           <ShieldAlert size={14} className="text-amber-600" />
-          <span>Observed lap pace analysis • Inferred degradation estimates</span>
+          <span>SYNTHETIC DEMO VALUES · NO DEGRADATION ESTIMATE</span>
         </div>
       </div>
 
@@ -42,6 +42,11 @@ export default function TyresPage() {
         </span>
 
         <div className="space-y-4">
+          {drivers.length === 0 && (
+            <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs text-slate-500">
+              No stint records are loaded for this source.
+            </p>
+          )}
           {drivers.map((drv) => (
             <div key={drv.driverNumber} className="flex flex-col gap-2">
               <div className="flex justify-between items-center text-xs font-mono">
@@ -75,7 +80,7 @@ export default function TyresPage() {
             <h3 className="font-mono font-bold text-sm tracking-wider">SOFT (C4 / C5)</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            Peak mechanical grip, rapid warm-up window. High thermal degradation (~0.12s per lap falloff). Optimal for qualifying and sprint stints.
+            Compound performance depends on allocation and conditions. This application has no measured soft-tyre degradation model.
           </p>
         </div>
 
@@ -85,7 +90,7 @@ export default function TyresPage() {
             <h3 className="font-mono font-bold text-sm tracking-wider">MEDIUM (C3)</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            Balanced endurance and lateral grip. Nominal stint window: 22-28 laps. Linear degradation profile (~0.06s per lap).
+            Compound performance depends on allocation and conditions. This application has no measured medium-tyre degradation model.
           </p>
         </div>
 
@@ -95,7 +100,7 @@ export default function TyresPage() {
             <h3 className="font-mono font-bold text-sm tracking-wider">HARD (C1 / C2)</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            Maximum carcass longevity. Resists thermal blistering on high-energy circuits. Low degradation (~0.03s per lap).
+            Compound performance depends on allocation and conditions. This application has no measured hard-tyre degradation model.
           </p>
         </div>
       </div>

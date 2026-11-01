@@ -24,14 +24,14 @@ export default function PacketInspectorPage() {
             </h1>
           </div>
           <p className="text-xs font-mono font-medium text-slate-500 mt-1">
-            UDP Receiver telemetry metrics • Binary packet decoding using Python struct
+            Educational fixture decoder specification. Live collector metrics are not wired to this page.
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono bg-white px-3.5 py-1.5 rounded-full border border-slate-200 shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-slate-500 font-semibold">UDP BIND:</span>
-          <span className="text-emerald-700 font-bold">127.0.0.1:20777</span>
+          <span className={`w-2 h-2 rounded-full ${diagnostics.receiverState === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+          <span className="text-slate-500 font-semibold">COLLECTOR:</span>
+          <span className="text-slate-700 font-bold">{diagnostics.receiverState.toUpperCase()}</span>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export default function PacketInspectorPage() {
           <div className="text-3xl font-black font-mono font-tabular text-sky-700">
             {diagnostics.packetsReceived.toLocaleString()}
           </div>
-          <span className="text-[10px] font-mono font-semibold text-emerald-600">0.00% packet loss</span>
+          <span className="text-[10px] font-mono font-semibold text-slate-500">Reported count; no service connection</span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col gap-1">
@@ -58,7 +58,7 @@ export default function PacketInspectorPage() {
           <div className="text-3xl font-black font-mono font-tabular text-emerald-600">
             {diagnostics.estimatedPacketRateHz.toFixed(1)} Hz
           </div>
-          <span className="text-[10px] font-mono font-semibold text-slate-400">Target: 60Hz tick</span>
+          <span className="text-[10px] font-mono font-semibold text-slate-400">Underlying simulator rate is unknown</span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col gap-1">
@@ -73,7 +73,7 @@ export default function PacketInspectorPage() {
       {/* Binary Packet Protocol Specification Table */}
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden p-6 shadow-sm flex flex-col gap-4">
         <span className="font-mono font-bold text-xs uppercase text-slate-800 tracking-wider">
-          EDUCATIONAL BINARY PACKET SPECIFICATION (LITTLE-ENDIAN)
+          EDUCATIONAL FIXTURE SPECIFICATION (NOT AN F1 SIMULATOR PROTOCOL)
         </span>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">

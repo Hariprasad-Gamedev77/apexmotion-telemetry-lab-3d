@@ -3,7 +3,7 @@
 // APEX TELEMETRY 3D — Simulator UDP & WebSocket Connection Setup
 // Light Theme with Reeve styling and vibrant connection badges
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useApexStore } from '@/lib/store';
 import { Wifi, ShieldCheck, Terminal } from 'lucide-react';
 
@@ -11,13 +11,24 @@ export default function ConnectionSetupPage() {
   const { wsConnected, setWsConnected } = useApexStore();
   const [wsUrl, setWsUrl] = useState('ws://127.0.0.1:8000/ws/telemetry');
   const [testing, setTesting] = useState(false);
+  const socketRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => () => socketRef.current?.close(), []);
 
   const handleTestConnection = () => {
     setTesting(true);
-    setTimeout(() => {
+    socketRef.current?.close();
+    setWsConnected(false);
+    try {
+      const socket = new WebSocket(wsUrl);
+      socketRef.current = socket;
+      socket.onopen = () => { setTesting(false); setWsConnected(true); };
+      socket.onerror = () => { setTesting(false); setWsConnected(false); };
+      socket.onclose = () => { setTesting(false); setWsConnected(false); };
+    } catch {
       setTesting(false);
-      setWsConnected(true);
-    }, 800);
+      setWsConnected(false);
+    }
   };
 
   return (
@@ -34,7 +45,7 @@ export default function ConnectionSetupPage() {
             </h1>
           </div>
           <p className="text-xs font-mono font-medium text-slate-500 mt-1">
-            Configure local Python UDP receiver and real-time WebSocket bridge
+            Connect to a local collector and inspect its educational packet stream
           </p>
         </div>
 
@@ -72,7 +83,7 @@ export default function ConnectionSetupPage() {
         </div>
 
         <p className="text-[11px] font-mono text-slate-500">
-          Note: For local gaming setups, run the Python collector script (<code className="text-sky-700 font-semibold bg-sky-50 px-1 py-0.5 rounded">python-collector/app/main.py</code>) on your racing PC.
+            This project currently decodes its own educational packet fixture. It is not compatible with EA SPORTS F1 UDP packets; a production simulator adapter is not implemented.
         </p>
       </div>
 
@@ -88,8 +99,8 @@ export default function ConnectionSetupPage() {
             <li>Enable UDP Telemetry output toggle.</li>
             <li>Set IP Address to <span className="text-slate-900 font-bold">127.0.0.1</span> (localhost).</li>
             <li>Set Port to <span className="text-slate-900 font-bold">20777</span>.</li>
-            <li>Set Packet Send Rate to <span className="text-slate-900 font-bold">60 Hz</span>.</li>
-            <li>Set UDP Format to 2024 / Standard Educational format.</li>
+            <li>Use the test sender included with the collector to generate its documented fixture packets.</li>
+            <li>Do not configure a commercial racing simulator to send to this decoder; its packet format is different.</li>
           </ol>
         </div>
 
@@ -99,7 +110,7 @@ export default function ConnectionSetupPage() {
             <h3>Architecture Security & Isolation</h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed font-sans">
-            Browsers cannot open raw UDP sockets directly due to Web platform sandbox security. The Python bridge receives UDP datagrams over loopback, validates binary packets with struct unpacking, and safely relays normalized JSON telemetry over WebSockets to this web interface.
+            The browser opens a real WebSocket connection to the configured address. The Python collector accepts the project's educational binary fixture format and relays decoded fields; it is not a verified simulator protocol adapter.
           </p>
         </div>
       </div>

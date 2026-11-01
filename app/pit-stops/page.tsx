@@ -1,6 +1,6 @@
 'use client';
 
-// APEX TELEMETRY 3D — Official Pit Stop & Service Duration Analysis (Daylight Theme)
+// APEX TELEMETRY 3D — Illustrative Pit Stop Fixture
 // Distinguishes stationary service time from total pit lane transit time.
 // Reference: https://formula-telemetry.com/sessions/2026/austin/race?tab=pit-stops
 
@@ -26,12 +26,12 @@ interface PitStopRecord {
 export default function PitStopsPage() {
   const { activeSession } = useApexStore();
 
-  // Real Austin 2024 Pit Stops (from OpenF1 official timing)
+  // Static illustrative Austin 2024 values; these are not fetched for activeSession.
   const pitStops: PitStopRecord[] = [
     {
-      driver: 'Carlos Sainz',
-      driverNumber: 55,
-      team: 'Ferrari',
+      driver: 'Demo Car B',
+      driverNumber: 2,
+      team: 'Synthetic Demo',
       teamColor: '#E11D48',
       lap: 21,
       stopNumber: 1,
@@ -43,9 +43,9 @@ export default function PitStopsPage() {
       positionAfter: 4,
     },
     {
-      driver: 'Max Verstappen',
-      driverNumber: 1,
-      team: 'Red Bull Racing',
+      driver: 'Demo Car C',
+      driverNumber: 3,
+      team: 'Synthetic Demo',
       teamColor: '#1E40AF',
       lap: 25,
       stopNumber: 1,
@@ -57,9 +57,9 @@ export default function PitStopsPage() {
       positionAfter: 5,
     },
     {
-      driver: 'Charles Leclerc',
-      driverNumber: 16,
-      team: 'Ferrari',
+      driver: 'Demo Car A',
+      driverNumber: 1,
+      team: 'Synthetic Demo',
       teamColor: '#DC2626',
       lap: 26,
       stopNumber: 1,
@@ -71,9 +71,9 @@ export default function PitStopsPage() {
       positionAfter: 3,
     },
     {
-      driver: 'Lando Norris',
+      driver: 'Demo Car D',
       driverNumber: 4,
-      team: 'McLaren',
+      team: 'Synthetic Demo',
       teamColor: '#EA580C',
       lap: 31,
       stopNumber: 1,
@@ -85,9 +85,9 @@ export default function PitStopsPage() {
       positionAfter: 5,
     },
     {
-      driver: 'Oscar Piastri',
-      driverNumber: 81,
-      team: 'McLaren',
+      driver: 'Demo Car E',
+      driverNumber: 5,
+      team: 'Synthetic Demo',
       teamColor: '#F59E0B',
       lap: 32,
       stopNumber: 1,
@@ -145,7 +145,7 @@ export default function PitStopsPage() {
                 PIT STOP DURATIONS & LANE ANALYSIS
               </h1>
               <p className="text-xs font-mono text-[#64748B] mt-0.5">
-                {activeSession.meetingName} • High-precision transponder timing
+                AUSTIN 2024 DEMO FIXTURE • Not loaded for {activeSession.meetingName}
               </p>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function PitStopsPage() {
             </h3>
           </div>
           <span className="text-[10px] font-mono text-[#047857] bg-[#D1FAE5] px-2 py-0.5 rounded border border-[#A7F3D0] font-semibold">
-            OFFICIAL TRANSPONDER DATA
+            ILLUSTRATIVE FIXTURE · SOURCE UNVERIFIED
           </span>
         </div>
 
