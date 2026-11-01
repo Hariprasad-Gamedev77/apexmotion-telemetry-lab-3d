@@ -1,6 +1,7 @@
-// APEX TELEMETRY 3D — Core Type Definitions
+// APEX TELEMETRY 3D — Core Type Definitions & Canonical Motorsport Models
 
 import type { DataMode, CameraMode, PlaybackSpeed } from './constants';
+import type { CircuitDataPassport } from './circuits/registry';
 
 export interface TelemetrySample {
   timestamp: number; // Seconds into session/lap
@@ -79,6 +80,7 @@ export interface DriverState {
   stintLaps: number;
   tyreCompound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET';
   visible: boolean;
+  headshotUrl?: string | null;
 }
 
 export interface LapSummary {
@@ -92,16 +94,18 @@ export interface LapSummary {
   isPersonalBest: boolean;
   isSessionBest: boolean;
   tyreCompound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET';
+  isPitOutLap?: boolean;
 }
 
 export interface SessionMetadata {
   id: string;
   sessionKey: number;
+  meetingKey?: number;
   meetingName: string;
   circuitName: string;
   country: string;
   year: number;
-  sessionType: 'Race' | 'Qualifying' | 'Sprint' | 'FP1' | 'FP2' | 'FP3' | 'Synthetic Simulation';
+  sessionType: 'Race' | 'Qualifying' | 'Sprint' | 'FP1' | 'FP2' | 'FP3' | 'Practice' | 'Synthetic Simulation';
   date: string;
   totalLaps: number;
   trackLengthMeters: number;
@@ -109,6 +113,106 @@ export interface SessionMetadata {
   availableDrivers: number[];
   hasCoordinateStream: boolean;
   hasHighFrequencyTelemetry: boolean;
+  circuitPassport?: CircuitDataPassport;
+}
+
+export interface Meeting {
+  meetingKey: number;
+  meetingName: string;
+  officialName: string;
+  location: string;
+  countryKey: number;
+  countryCode: string;
+  countryName: string;
+  circuitKey: number;
+  circuitShortName: string;
+  circuitType?: string;
+  gmtOffset?: string;
+  dateStart: string;
+  dateEnd: string;
+  year: number;
+  isCancelled?: boolean;
+}
+
+export interface DriverIdentity {
+  driverNumber: number;
+  broadcastName: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  nameAcronym: string;
+  teamName: string;
+  teamColour: string;
+  headshotUrl: string | null;
+  countryCode: string;
+  meetingKey?: number;
+  sessionKey?: number;
+}
+
+export interface PitStop {
+  sessionKey: number;
+  meetingKey?: number;
+  driverNumber: number;
+  lapNumber: number;
+  stopDuration: number; // Seconds stationary in box
+  laneDuration: number; // Seconds total in pit lane
+  date: string;
+}
+
+export interface Stint {
+  sessionKey: number;
+  meetingKey?: number;
+  driverNumber: number;
+  stintNumber: number;
+  lapStart: number;
+  lapEnd: number;
+  compound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET' | 'UNKNOWN';
+  tyreAgeAtStart: number;
+}
+
+export interface PositionPoint {
+  sessionKey: number;
+  driverNumber: number;
+  date: string;
+  position: number;
+}
+
+export interface IntervalPoint {
+  sessionKey: number;
+  driverNumber: number;
+  date: string;
+  gapToLeader: number | null; // Seconds behind leader
+  interval: number | null; // Seconds behind car ahead
+}
+
+export interface DriverLocationPoint {
+  sessionKey: number;
+  driverNumber: number;
+  date: string;
+  x: number; // Track coordinate decimeters
+  y: number; // Track coordinate decimeters
+  z: number; // Elevation decimeters
+}
+
+export interface ChampionshipDriverStanding {
+  position: number;
+  driverNumber: number;
+  code: string;
+  name: string;
+  team: string;
+  teamColor: string;
+  points: number;
+  wins: number;
+  podiums: number;
+}
+
+export interface ChampionshipConstructorStanding {
+  position: number;
+  team: string;
+  teamColor: string;
+  points: number;
+  wins: number;
+  podiums: number;
 }
 
 export interface ReplayState {
@@ -137,4 +241,16 @@ export interface PacketDiagnosticMetrics {
   connectedClients: number;
   recordingActive: boolean;
   recordedBytes: number;
+}
+
+export interface DataProvenance {
+  source: 'SYNTHETIC_SIM' | 'HISTORICAL_OPENF1' | 'USER_CSV_UPLOAD' | 'SIMULATOR_UDP';
+  isSynthetic: boolean;
+  datasetId?: string;
+  sessionUid?: string;
+  sourceFilename?: string;
+  sha256Hash?: string;
+  retrievalTimestamp: string;
+  recordCount: number;
+  verified: boolean;
 }

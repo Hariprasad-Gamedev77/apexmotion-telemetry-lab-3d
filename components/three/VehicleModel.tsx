@@ -16,7 +16,7 @@ interface VehicleModelProps {
   drsActive?: boolean;
 }
 
-export function VehicleModel({
+export const VehicleModel = React.memo(function VehicleModel({
   position,
   heading,
   color = '#3671C6',
@@ -217,4 +217,6 @@ export function VehicleModel({
       </mesh>
     </group>
   );
-}
+});
+
+export default VehicleModel;

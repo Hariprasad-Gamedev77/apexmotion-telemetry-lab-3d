@@ -15,6 +15,7 @@ from .protocols.f1_educational import EducationalPacketDecoder
 from .normalizer import TelemetryNormalizer
 from .broadcaster import WebSocketBroadcaster
 from .recorder import TelemetryRecorder
+from .api import router as analytics_router
 
 logging.basicConfig(level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO))
 logger = logging.getLogger("apex.main")
@@ -70,6 +71,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(analytics_router)
 
 @app.get("/api/v1/health")
 async def health_check():

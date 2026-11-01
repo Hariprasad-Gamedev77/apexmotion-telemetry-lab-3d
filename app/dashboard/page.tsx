@@ -1,8 +1,8 @@
 'use client';
 
 // APEX TELEMETRY 3D — Flagship 3D Motorsport Workstation
-// Reeve-inspired floating UI/UX, light daylight aesthetic, adjustable non-overlapping graph drawer,
-// and Formula Telemetry Singapore GP tabs (Lap Analysis, Race Progression, Strategy, Pit Stops).
+// Reeve-Inspired Daylight Theme (#F8FAFC / #FFFFFF / #E2E8F0 / #0F172A / #0284C7)
+// Synchronized 3D vehicle simulation, adjustable telemetry workbench, and Formula Telemetry tabs.
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
@@ -22,23 +22,14 @@ import {
   Map,
   Cpu,
   Sliders,
-  Maximize2,
-  Minimize2,
-  Layers,
-  Gauge,
-  ListOrdered,
-  TrendingUp,
-  CircleDot,
-  Wrench,
-  Compass,
 } from 'lucide-react';
 
 const ApexScene = dynamic(() => import('@/components/three/ApexScene'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 gap-3 font-mono">
-      <div className="w-10 h-10 border-3 border-sky-600 border-t-transparent rounded-full animate-spin shadow-md shadow-sky-200" />
-      <span className="text-xs text-sky-700 font-bold tracking-wider uppercase">
+    <div className="w-full h-full flex flex-col items-center justify-center bg-[#F1F5F9] gap-3 font-mono">
+      <div className="w-10 h-10 border-3 border-[#0284C7] border-t-transparent rounded-full animate-spin shadow-md shadow-[#0284C7]/20" />
+      <span className="text-xs text-[#0284C7] font-bold tracking-wider uppercase">
         Initializing 3D Telemetry Environment...
       </span>
     </div>
@@ -51,7 +42,7 @@ export default function DashboardPage() {
   const [chartViewMode, setChartViewMode] = useState<'split' | 'overlay'>('split');
   const [activeTab, setActiveTab] = useState<'hud' | 'sim' | 'adjust' | 'map'>('hud');
   const [formulaTab, setFormulaTab] = useState<FormulaTelemetryTab>('telemetry');
-  
+
   // Adjustable Graph Height: 'compact' (220px), 'medium' (320px), 'expanded' (440px), 'maximized' (62vh)
   const [graphHeight, setGraphHeight] = useState<'compact' | 'medium' | 'expanded' | 'maximized'>('medium');
 
@@ -94,55 +85,54 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="relative w-full h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden bg-slate-100 select-none">
-      {/* Upper Area: 3D Scene + Reeve Floating Control Dock */}
+    <div className="relative w-full h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden bg-[#F8FAFC] select-none text-[#0F172A]">
+      {/* Upper Area: 3D Scene + Floating Control Dock */}
       <div className="relative flex-1 w-full min-h-0">
         <ApexScene />
 
-        {/* --- Reeve Floating Workstation Capsule (Top Right) --- */}
-        {/* Constrained to top corner so it never collides with bottom graphs */}
+        {/* Floating Workstation Capsule (Top Right) */}
         <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 w-84 max-h-[calc(100%-3rem)] overflow-y-auto">
           {/* Segmented Pill Tab Bar */}
-          <div className="flex items-center gap-1 bg-white/95 p-1 rounded-2xl border border-slate-200 backdrop-blur-2xl shadow-lg shadow-slate-200/50">
+          <div className="flex items-center gap-1 bg-white/95 p-1 rounded-2xl border border-[#E2E8F0] backdrop-blur-2xl shadow-xl">
             <button
               onClick={() => setActiveTab('hud')}
               className={`flex-1 py-1.5 rounded-xl text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
                 activeTab === 'hud'
-                  ? 'bg-sky-50 text-sky-800 border border-sky-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-[#EFF6FF] text-[#0284C7] border border-[#BAE6FD] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
               }`}
             >
-              <Activity size={12} className={activeTab === 'hud' ? 'text-sky-600' : 'text-slate-400'} /> HUD
+              <Activity size={12} className={activeTab === 'hud' ? 'text-[#0284C7]' : 'text-[#64748B]'} /> HUD
             </button>
             <button
               onClick={() => setActiveTab('sim')}
               className={`flex-1 py-1.5 rounded-xl text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
                 activeTab === 'sim'
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-[#D1FAE5] text-[#047857] border border-[#A7F3D0] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
               }`}
             >
-              <Cpu size={12} className={activeTab === 'sim' ? 'text-emerald-600' : 'text-slate-400'} /> Physics
+              <Cpu size={12} className={activeTab === 'sim' ? 'text-[#047857]' : 'text-[#64748B]'} /> Physics
             </button>
             <button
               onClick={() => setActiveTab('adjust')}
               className={`flex-1 py-1.5 rounded-xl text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
                 activeTab === 'adjust'
-                  ? 'bg-purple-50 text-purple-800 border border-purple-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-[#F3E8FF] text-[#7C3AED] border border-[#DDD6FE] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
               }`}
             >
-              <Sliders size={12} className={activeTab === 'adjust' ? 'text-purple-600' : 'text-slate-400'} /> Track
+              <Sliders size={12} className={activeTab === 'adjust' ? 'text-[#7C3AED]' : 'text-[#64748B]'} /> Track
             </button>
             <button
               onClick={() => setActiveTab('map')}
               className={`flex-1 py-1.5 rounded-xl text-[11px] font-mono font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
                 activeTab === 'map'
-                  ? 'bg-amber-50 text-amber-800 border border-amber-300 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] shadow-xs'
+                  : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
               }`}
             >
-              <Map size={12} className={activeTab === 'map' ? 'text-amber-600' : 'text-slate-400'} /> 2D
+              <Map size={12} className={activeTab === 'map' ? 'text-[#B45309]' : 'text-[#64748B]'} /> 2D
             </button>
           </div>
 
@@ -155,20 +145,19 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* --- Floating Bottom Drawer Toggle & Adjustment Controls --- */}
+        {/* Floating Bottom Drawer Toggle & Adjustment Controls */}
         <div className="absolute bottom-3 right-4 z-20 flex items-center gap-2">
           {showCharts && (
-            <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-slate-200 backdrop-blur-xl shadow-md text-xs font-mono">
-              {/* Height Adjuster Pills */}
-              <span className="text-[10px] text-slate-400 font-bold px-1.5">Height:</span>
+            <div className="flex items-center gap-1 bg-white/95 p-1 rounded-xl border border-[#E2E8F0] backdrop-blur-xl shadow-md text-xs font-mono">
+              <span className="text-[10px] text-[#64748B] font-bold px-1.5">Height:</span>
               {(['compact', 'medium', 'expanded'] as const).map((h) => (
                 <button
                   key={h}
                   onClick={() => setGraphHeight(h)}
                   className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase transition-all active:scale-95 ${
                     graphHeight === h
-                      ? 'bg-slate-800 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100'
+                      ? 'bg-[#0284C7] text-white shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9]'
                   }`}
                 >
                   {h === 'compact' ? 'S' : h === 'medium' ? 'M' : 'L'}
@@ -179,7 +168,7 @@ export default function DashboardPage() {
 
           <button
             onClick={() => setShowCharts(!showCharts)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 border border-slate-200 text-xs font-mono font-bold text-slate-800 hover:text-slate-950 hover:bg-white backdrop-blur-xl transition-all shadow-md active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 border border-[#E2E8F0] text-xs font-mono font-bold text-[#0F172A] hover:bg-[#F8FAFC] backdrop-blur-xl transition-all shadow-md active:scale-95"
           >
             <span>{showCharts ? 'Hide Workbench' : 'Show Workbench'}</span>
             {showCharts ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
@@ -187,9 +176,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* --- Adjustable Formula Telemetry & Split Graphs Drawer --- */}
+      {/* Adjustable Formula Telemetry & Split Graphs Drawer */}
       {showCharts && (
-        <div className={`w-full ${heightClasses[graphHeight]} overflow-y-auto px-4 pt-2 pb-3 bg-slate-50 border-t border-slate-200 transition-all backdrop-blur-xl shadow-inner flex flex-col gap-2`}>
+        <div className={`w-full ${heightClasses[graphHeight]} overflow-y-auto px-4 pt-2 pb-3 bg-white border-t border-[#E2E8F0] transition-all backdrop-blur-xl shadow-xl flex flex-col gap-2 scrollbar-thin scrollbar-thumb-[#CBD5E1]`}>
           {/* Formula Telemetry Navigation Tabs */}
           <FormulaTelemetrySuite activeTab={formulaTab} onTabChange={setFormulaTab} />
 
@@ -197,16 +186,16 @@ export default function DashboardPage() {
           {formulaTab === 'telemetry' && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">
+                <span className="text-[10px] font-mono text-[#64748B] uppercase font-bold">
                   View Mode:
                 </span>
-                <div className="flex items-center gap-1 bg-white p-0.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-1 bg-[#F1F5F9] p-0.5 rounded-xl border border-[#E2E8F0]">
                   <button
                     onClick={() => setChartViewMode('split')}
                     className={`px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold transition-all ${
                       chartViewMode === 'split'
-                        ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white text-[#0284C7] border border-[#0284C7]/30 shadow-xs'
+                        : 'text-[#64748B] hover:text-[#0F172A]'
                     }`}
                   >
                     Split Panes
@@ -215,8 +204,8 @@ export default function DashboardPage() {
                     onClick={() => setChartViewMode('overlay')}
                     className={`px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold transition-all ${
                       chartViewMode === 'overlay'
-                        ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white text-[#0284C7] border border-[#0284C7]/30 shadow-xs'
+                        : 'text-[#64748B] hover:text-[#0F172A]'
                     }`}
                   >
                     Overlay
@@ -234,7 +223,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* --- Pinned Bottom Replay Controller --- */}
+      {/* Pinned Bottom Replay Controller */}
       <ReplayControls onOpenTrackAdjustment={() => setActiveTab('adjust')} />
     </div>
   );

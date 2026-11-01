@@ -1,8 +1,9 @@
 'use client';
 
 // APEX TELEMETRY 3D — Main Three.js Racing Environment Scene (Daylight Motorsport Light Theme)
+// Optimized for stable 60+ FPS with throttled store ticks and distinct multi-car spatial lanes.
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { CircuitMesh } from './CircuitMesh';
 import { VehicleModel } from './VehicleModel';
@@ -10,19 +11,26 @@ import { CameraController } from './CameraController';
 import { useApexStore } from '@/lib/store';
 
 function SceneContent() {
-  const {
-    circuit,
-    currentTelemetry,
-    cameraMode,
-    drivers,
-    selectedDriverNumber,
-    trackSettings,
-    tickSimulation,
-  } = useApexStore();
+  const circuit = useApexStore((s) => s.circuit);
+  const currentTelemetry = useApexStore((s) => s.currentTelemetry);
+  const cameraMode = useApexStore((s) => s.cameraMode);
+  const drivers = useApexStore((s) => s.drivers);
+  const selectedDriverNumber = useApexStore((s) => s.selectedDriverNumber);
+  const trackSettings = useApexStore((s) => s.trackSettings);
+  const tickSimulation = useApexStore((s) => s.tickSimulation);
+
+  // Store update accumulator: Throttles React state updates to 20Hz (0.05s)
+  // This allows Three.js to render WebGL frames at native 60-120 FPS without React reconciliation lag.
+  const accumulatorRef = useRef(0);
 
   useFrame((_, delta) => {
     const clampedDelta = Math.min(delta, 0.05);
-    tickSimulation(clampedDelta);
+    accumulatorRef.current += clampedDelta;
+
+    if (accumulatorRef.current >= 0.048) {
+      tickSimulation(accumulatorRef.current);
+      accumulatorRef.current = 0;
+    }
   });
 
   const rotRad = (trackSettings.trackRotation * Math.PI) / 180;
@@ -48,10 +56,15 @@ function SceneContent() {
 
   const selectedDriver = drivers.find((d) => d.driverNumber === selectedDriverNumber);
 
+  // Other competitor drivers with anti-overlap spacing
+  const competitorDrivers = useMemo(() => {
+    return drivers.filter((d) => d.driverNumber !== selectedDriverNumber && d.visible);
+  }, [drivers, selectedDriverNumber]);
+
   return (
     <>
       {/* Daylight Motorsport Lighting Architecture */}
-      <ambientLight intensity={0.75} color="#FFFFFF" />
+      <ambientLight intensity={0.8} color="#FFFFFF" />
       <directionalLight
         position={[300, 450, 180]}
         intensity={1.8}
@@ -66,7 +79,7 @@ function SceneContent() {
         shadow-camera-bottom={-600}
       />
       <directionalLight position={[-250, 150, -250]} intensity={0.5} color="#BAE6FD" />
-      <fog attach="fog" args={['#E2E8F0', 250, 2000]} />
+      <fog attach="fog" args={['#F1F5F9', 300, 2200]} />
 
       {/* Dynamic Camera following lead car */}
       <CameraController
@@ -82,44 +95,38 @@ function SceneContent() {
       <VehicleModel
         position={leadTrans.pos}
         heading={leadTrans.heading}
-        color={selectedDriver?.color || '#1E40AF'}
+        color={selectedDriver?.color || '#0284C7'}
         driverNumber={selectedDriverNumber}
         driverCode={selectedDriver?.code || 'VER'}
         speedKph={currentTelemetry.speedKph}
         drsActive={currentTelemetry.drs === 1}
       />
 
-      {/* Render Other Grid Competitor Vehicles */}
-      {drivers
-        .filter((d) => d.driverNumber !== selectedDriverNumber && d.visible)
-        .map((driver, index) => {
-          const offsetDist = (currentTelemetry.distanceMeters - (index + 1) * 75 + circuit.lengthMeters) % circuit.lengthMeters;
-          const wpIdx = Math.floor((offsetDist / circuit.lengthMeters) * circuit.waypoints.length) % circuit.waypoints.length;
-          const wp = circuit.waypoints[wpIdx];
-          if (!wp) return null;
+      {/* Render Other Grid Competitor Vehicles with distinct individual positions and lateral lanes */}
+      {competitorDrivers.map((driver) => {
+        const dTel = driver.telemetry;
+        const otherTrans = transformPos(dTel.worldX, dTel.worldY, dTel.worldZ, dTel.heading);
 
-          const otherTrans = transformPos(wp.x, wp.y, wp.z, wp.heading);
-
-          return (
-            <VehicleModel
-              key={driver.driverNumber}
-              position={otherTrans.pos}
-              heading={otherTrans.heading}
-              color={driver.color}
-              driverNumber={driver.driverNumber}
-              driverCode={driver.code}
-              speedKph={currentTelemetry.speedKph * 0.98}
-              drsActive={false}
-            />
-          );
-        })}
+        return (
+          <VehicleModel
+            key={driver.driverNumber}
+            position={otherTrans.pos}
+            heading={otherTrans.heading}
+            color={driver.color}
+            driverNumber={driver.driverNumber}
+            driverCode={driver.code}
+            speedKph={dTel.speedKph}
+            drsActive={dTel.drs === 1}
+          />
+        );
+      })}
     </>
   );
 }
 
 export default function ApexScene() {
   return (
-    <div className="relative w-full h-full bg-[#E2E8F0] overflow-hidden select-none">
+    <div className="relative w-full h-full bg-[#F1F5F9] overflow-hidden select-none">
       <Canvas
         shadows
         gl={{ antialias: true, powerPreference: 'high-performance' }}

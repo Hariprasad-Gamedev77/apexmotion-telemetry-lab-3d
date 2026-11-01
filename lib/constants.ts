@@ -1,22 +1,22 @@
-// APEX TELEMETRY 3D — Global Engineering Constants (Light Theme System)
+// APEX TELEMETRY 3D — Global Engineering Constants (Motorsport Design Tokens)
+// High-contrast daylight engineering palette inspired by Reeve UI & Formula Telemetry
 
 export const COLORS = {
   bg: '#F8FAFC',
-  bgSecondary: '#F1F5F9',
+  sidebar: '#FFFFFF',
   panel: '#FFFFFF',
-  panelHover: '#F8FAFC',
+  elevated: '#F1F5F9',
   border: '#E2E8F0',
-  borderBright: '#CBD5E1',
+  borderHover: '#CBD5E1',
   text: '#0F172A',
   textSecondary: '#475569',
   textMuted: '#94A3B8',
-  cyan: '#0284C7',   // Sky-600 (Velocity)
-  green: '#10B981',  // Emerald-500 (Throttle)
-  red: '#EF4444',    // Crimson-500 (Brake)
-  amber: '#F59E0B',  // Amber-500 (RPM)
-  violet: '#8B5CF6', // Violet-500 (Gear & Comparison)
-  indigo: '#6366F1', // Indigo
-  orange: '#FF8000', // Papaya
+  cyan: '#0284C7',   // Velocity / Primary Highlights (Sky Blue)
+  green: '#10B981',  // Throttle / Advantaged (Emerald)
+  red: '#EF4444',    // Brake / Deficit (Rose)
+  amber: '#F59E0B',  // Engine RPM / Stints (Amber)
+  violet: '#8B5CF6', // Lap Comparison / Gear (Violet)
+  papaya: '#EA580C', // McLaren Papaya
 } as const;
 
 export const DRIVER_COLORS: Record<string, string> = {

@@ -1,10 +1,11 @@
 // APEXMOTION TELEMETRY LAB 3D — Master Automated Verification Suite Runner
-// Executes Mathematics, Telemetry Validation, Vehicle Dynamics, and Lap Comparison suites.
+// Executes Mathematics, Telemetry Validation, Vehicle Dynamics, Lap Comparison, and Circuit/Adapter suites.
 
 import { runMathematicsTests } from './physics_and_replay.test';
 import { runValidationTests } from './validation.test';
 import { runDynamicsTests } from './dynamics.test';
 import { runComparisonTests } from './comparison.test';
+import { runCircuitAndAdapterTests } from './circuit_and_adapter.test';
 
 console.log('================================================================');
 console.log('   APEXMOTION TELEMETRY LAB 3D — SCIENTIFIC VERIFICATION SUITE   ');
@@ -21,6 +22,7 @@ const suites: { suiteName: string; run: () => TestResult[] }[] = [
   { suiteName: 'Suite 2: Phase Three — Telemetry Data Validation & Edge Cases', run: runValidationTests },
   { suiteName: 'Suite 3: Phase Six — Lap Alignment & Known-Answer Comparisons', run: runComparisonTests },
   { suiteName: 'Suite 4: Phase Seven — Longitudinal Dynamics & Dimensional Physics', run: runDynamicsTests },
+  { suiteName: 'Suite 5: Milestone 2 & 5 — Circuit Geometry, OpenF1 Schemas & Non-Overlap Invariants', run: runCircuitAndAdapterTests },
 ];
 
 let totalPassed = 0;
@@ -48,8 +50,9 @@ console.log(`TOTAL EXECUTED: ${totalPassed + totalFailed} | PASSED: ${totalPasse
 if (totalFailed === 0) {
   console.log('ALL VERIFICATION & RELIABILITY TEST SUITES PASSED DETERMINISTICALLY.');
   console.log('================================================================\n');
+  process.exit(0);
 } else {
-  console.error('VERIFICATION SUITE DETECTED DEFECTS.');
+  console.error('VERIFICATION SUITE DETECTED FAILURES. ABORTING.');
   console.log('================================================================\n');
   process.exit(1);
 }

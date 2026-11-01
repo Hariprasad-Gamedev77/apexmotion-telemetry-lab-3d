@@ -1,6 +1,7 @@
 'use client';
 
-// APEX TELEMETRY 3D — Collapsible Sidebar Navigation (Light Theme with Rich Accents)
+// APEX TELEMETRY 3D — Professional Motorsport Engineering Navigation Sidebar
+// Styling: Daylight theme (Background #FFFFFF, Borders #E2E8F0, Active #0284C7, Text #0F172A / #475569)
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -14,10 +15,14 @@ import {
   ListOrdered,
   GitCompare,
   Users,
+  TrendingUp,
+  Sliders,
+  Wrench,
   CircleDot,
   RotateCw,
-  History,
   Database,
+  Trophy,
+  MapPin,
   FileSpreadsheet,
   Binary,
   Wifi,
@@ -41,40 +46,44 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: 'Live',
+    title: 'LIVE',
     items: [
-      { title: 'Dashboard', href: '/dashboard', icon: Gauge, color: 'text-sky-600' },
-      { title: 'Live Timing', href: '/timing', icon: Timer, color: 'text-emerald-600' },
-      { title: 'Track Map', href: '/track-map', icon: Compass, color: 'text-indigo-600' },
-      { title: 'Vehicle Telemetry', href: '/telemetry', icon: Activity, color: 'text-rose-600' },
+      { title: 'Dashboard', href: '/dashboard', icon: Gauge, color: 'text-[#0284C7]' },
+      { title: 'Live Timing', href: '/timing', icon: Timer, color: 'text-[#10B981]' },
+      { title: 'Track Map', href: '/track-map', icon: Compass, color: 'text-[#0284C7]' },
+      { title: 'Vehicle Telemetry', href: '/telemetry', icon: Activity, color: 'text-[#EF4444]' },
     ],
   },
   {
-    title: 'Analysis',
+    title: 'ANALYSIS',
     items: [
-      { title: 'Telemetry Explorer', href: '/explore', icon: LineChart, color: 'text-sky-600' },
-      { title: 'Lap Analysis', href: '/laps', icon: ListOrdered, color: 'text-amber-600' },
-      { title: 'Lap Comparison', href: '/comparison', icon: GitCompare, color: 'text-violet-600' },
-      { title: 'Driver Comparison', href: '/drivers', icon: Users, color: 'text-teal-600' },
-      { title: 'Tyres & Stints', href: '/tyres', icon: CircleDot, color: 'text-orange-600' },
-      { title: 'Track Replay', href: '/replay', icon: RotateCw, color: 'text-blue-600' },
-      { title: 'Session History', href: '/history', icon: History, color: 'text-slate-600' },
+      { title: 'Telemetry Explorer', href: '/explore', icon: LineChart, color: 'text-[#0284C7]' },
+      { title: 'Lap Analysis', href: '/laps', icon: ListOrdered, color: 'text-[#F59E0B]' },
+      { title: 'Lap Comparison', href: '/comparison', icon: GitCompare, color: 'text-[#8B5CF6]' },
+      { title: 'Driver Comparison', href: '/drivers', icon: Users, color: 'text-[#10B981]' },
+      { title: 'Race Progression', href: '/progression', icon: TrendingUp, color: 'text-[#0284C7]' },
+      { title: 'Race Strategy', href: '/strategy', icon: Sliders, color: 'text-[#F59E0B]' },
+      { title: 'Pit Stops', href: '/pit-stops', icon: Wrench, color: 'text-[#EF4444]' },
+      { title: 'Tyres & Stints', href: '/tyres', icon: CircleDot, color: 'text-[#EA580C]' },
+      { title: 'Track Replay', href: '/replay', icon: RotateCw, color: 'text-[#0284C7]' },
     ],
   },
   {
-    title: 'Data',
+    title: 'DATA',
     items: [
-      { title: 'Historical Explorer', href: '/historical', icon: Database, color: 'text-amber-600' },
-      { title: 'Import & Export', href: '/data', icon: FileSpreadsheet, color: 'text-emerald-600' },
-      { title: 'Packet Inspector', href: '/packets', icon: Binary, color: 'text-violet-600' },
+      { title: 'Circuit Explorer', href: '/circuits', icon: MapPin, color: 'text-[#0284C7]' },
+      { title: 'Historical Explorer', href: '/historical', icon: Database, color: 'text-[#F59E0B]' },
+      { title: 'Championship Stats', href: '/stats', icon: Trophy, color: 'text-[#F59E0B]' },
+      { title: 'Import & Export', href: '/data', icon: FileSpreadsheet, color: 'text-[#10B981]' },
+      { title: 'Packet Inspector', href: '/packets', icon: Binary, color: 'text-[#8B5CF6]' },
     ],
   },
   {
-    title: 'System',
+    title: 'SYSTEM',
     items: [
-      { title: 'Connection Setup', href: '/connection', icon: Wifi, color: 'text-emerald-600' },
-      { title: 'Diagnostics', href: '/diagnostics', icon: Cpu, color: 'text-sky-600' },
-      { title: 'About APEX', href: '/about', icon: Info, color: 'text-slate-600' },
+      { title: 'Connection Setup', href: '/connection', icon: Wifi, color: 'text-[#10B981]' },
+      { title: 'Diagnostics', href: '/diagnostics', icon: Cpu, color: 'text-[#0284C7]' },
+      { title: 'About APEX', href: '/about', icon: Info, color: 'text-[#475569]' },
     ],
   },
 ];
@@ -85,23 +94,23 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`relative flex flex-col h-screen bg-white border-r border-slate-200 shadow-sm transition-all duration-200 select-none z-40 ${
-        collapsed ? 'w-16' : 'w-60'
+      className={`relative flex flex-col h-screen bg-white border-r border-[#E2E8F0] shadow-sm transition-all duration-200 select-none z-40 ${
+        collapsed ? 'w-16' : 'w-64'
       }`}
     >
       {/* Brand Header */}
-      <div className="flex items-center justify-between h-14 px-3 border-b border-slate-200 bg-slate-50/50">
+      <div className="flex items-center justify-between h-14 px-3 border-b border-[#E2E8F0] bg-[#F8FAFC]">
         {!collapsed && (
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-sm shadow-md shadow-sky-500/20">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#0284C7] via-[#2563EB] to-[#8B5CF6] flex items-center justify-center font-black text-white text-sm shadow-sm shadow-[#0284C7]/20">
               A
             </div>
             <div className="flex flex-col">
-              <span className="font-mono font-black text-xs tracking-wider text-slate-900 group-hover:text-sky-600 transition-colors">
+              <span className="font-mono font-black text-xs tracking-wider text-[#0F172A] group-hover:text-[#0284C7] transition-colors">
                 APEX TELEMETRY
               </span>
-              <span className="text-[9px] font-mono font-bold text-sky-600 uppercase tracking-widest -mt-0.5">
-                3D WORKBENCH
+              <span className="text-[9px] font-mono text-[#64748B] tracking-tight">
+                MOTORSPORT ENGINEERING
               </span>
             </div>
           </Link>
@@ -109,7 +118,7 @@ export function Sidebar() {
 
         {collapsed && (
           <Link href="/" className="mx-auto">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center font-black text-white text-sm shadow-md shadow-sky-500/20">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#0284C7] via-[#2563EB] to-[#8B5CF6] flex items-center justify-center font-black text-white text-sm shadow-sm">
               A
             </div>
           </Link>
@@ -117,66 +126,65 @@ export function Sidebar() {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`p-1.5 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-slate-900 transition-colors ${
-            collapsed ? 'hidden' : 'block'
+          className={`p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors ${
+            collapsed ? 'mx-auto mt-1' : ''
           }`}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <ChevronLeft size={16} />
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      {/* Navigation Links Scrollable Area */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+      {/* Nav List */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-4 scrollbar-thin scrollbar-thumb-[#CBD5E1]">
         {NAV_SECTIONS.map((section) => (
           <div key={section.title} className="space-y-1">
             {!collapsed && (
-              <div className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-bold tracking-wider text-[#64748B] uppercase">
                 {section.title}
               </div>
             )}
 
             {section.items.map((item) => {
+              const active = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
               const Icon = item.icon;
-              const isActive = pathname === item.href;
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-mono font-medium transition-all group ${
-                    isActive
-                      ? 'bg-sky-50 text-sky-700 font-bold border border-sky-200/80 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-mono font-medium transition-all ${
+                    active
+                      ? 'bg-[#F1F5F9] text-[#0F172A] font-bold border-l-2 border-[#0284C7] shadow-xs'
+                      : 'text-[#475569] hover:text-[#0F172A] hover:bg-[#F8FAFC]'
                   } ${collapsed ? 'justify-center px-0' : ''}`}
                   title={collapsed ? item.title : undefined}
                 >
-                  <Icon
-                    size={16}
-                    className={`shrink-0 transition-colors ${
-                      isActive ? 'text-sky-600' : `${item.color} group-hover:scale-110`
-                    }`}
-                  />
-                  {!collapsed && <span>{item.title}</span>}
+                  <Icon size={17} className={active ? 'text-[#0284C7]' : item.color} />
+                  {!collapsed && <span className="truncate">{item.title}</span>}
                 </Link>
               );
             })}
           </div>
         ))}
-      </div>
+      </nav>
 
-      {/* Footer Toggle when collapsed */}
-      {collapsed && (
-        <div className="p-2 border-t border-slate-200 flex justify-center bg-slate-50/50">
-          <button
-            onClick={() => setCollapsed(false)}
-            className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-900"
-            title="Expand sidebar"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
-      )}
+      {/* Footer System Status */}
+      <div className="p-3 border-t border-[#E2E8F0] bg-[#F8FAFC]">
+        {!collapsed ? (
+          <div className="flex items-center justify-between text-[10px] font-mono text-[#64748B]">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="font-semibold text-[#0F172A]">ENGINE READY</span>
+            </div>
+            <span className="text-[#94A3B8]">v2.4.0</span>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+          </div>
+        )}
+      </div>
     </aside>
   );
 }

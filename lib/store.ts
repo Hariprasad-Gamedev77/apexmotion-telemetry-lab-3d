@@ -1,4 +1,5 @@
-// APEX TELEMETRY 3D — Zustand Unified Application Store
+// APEX TELEMETRY 3D — Zustand Unified Application Store & Global Session Context
+// Centralized state for live simulation, historical OpenF1 sessions, circuit geometry, and 3D vehicle tracking.
 
 import { create } from 'zustand';
 import { DATA_MODES, CAMERA_MODES, PLAYBACK_SPEEDS, type DataMode, type CameraMode, type PlaybackSpeed } from './constants';
@@ -9,19 +10,48 @@ import type {
   LapSummary,
   PacketDiagnosticMetrics,
   TrackAdjustmentSettings,
+  DriverIdentity,
+  PitStop,
+  Stint,
+  DriverLocationPoint,
 } from './types';
 import {
-  generateSyntheticCircuit,
   generateSingaporeCircuit,
   CIRCUITS_REGISTRY,
   type GeneratedCircuit,
 } from './simulation/trackGenerator';
 import { VehicleSimulator } from './simulation/vehiclePhysics';
+import {
+  fetchSessionDrivers,
+  fetchSessionLaps,
+  fetchSessionPitStops,
+  fetchSessionStints,
+} from './api/openf1';
+import { VERIFIED_CIRCUITS } from './circuits/registry';
 
 interface ApexAppState {
   // Mode
   dataMode: DataMode;
   setDataMode: (mode: DataMode) => void;
+
+  // Global Session Context
+  selectedYear: number;
+  setSelectedYear: (year: number) => void;
+  selectedMeetingKey: number | null;
+  setSelectedMeetingKey: (key: number | null) => void;
+  activeSession: SessionMetadata;
+  setActiveSession: (session: SessionMetadata) => void;
+  loadHistoricalSession: (session: SessionMetadata) => Promise<void>;
+
+  // Driver & Lap Selection
+  selectedDriverNumber: number;
+  setSelectedDriverNumber: (num: number) => void;
+  comparisonDriverNumber: number | null;
+  setComparisonDriverNumber: (num: number | null) => void;
+  selectedLapNumber: number;
+  setSelectedLapNumber: (lap: number) => void;
+  comparisonLapNumber: number | null;
+  setComparisonLapNumber: (lap: number | null) => void;
 
   // Active Circuit & Simulation
   circuit: GeneratedCircuit;
@@ -35,7 +65,7 @@ interface ApexAppState {
   setManualBrake: (val: number) => void;
   switchCircuit: (circuitId: string) => void;
 
-  // Track Adjustment & Visual Tuning (Formula Telemetry Reference)
+  // Track Adjustment & Visual Tuning
   trackSettings: TrackAdjustmentSettings;
   updateTrackSettings: (settings: Partial<TrackAdjustmentSettings>) => void;
 
@@ -57,25 +87,23 @@ interface ApexAppState {
   setFollowCar: (follow: boolean) => void;
   restartReplay: () => void;
 
-  // Driver & Telemetry
-  selectedDriverNumber: number;
-  setSelectedDriverNumber: (num: number) => void;
+  // Driver Fleet & Telemetry
   drivers: DriverState[];
   setDrivers: (drivers: DriverState[]) => void;
   toggleDriverVisibility: (driverNumber: number) => void;
+  sessionDrivers: DriverIdentity[];
+  availableLaps: LapSummary[];
+  setAvailableLaps: (laps: LapSummary[]) => void;
+  sessionPitStops: PitStop[];
+  sessionStints: Stint[];
+  driverLocations: Record<number, DriverLocationPoint[]>;
 
   currentTelemetry: TelemetrySample;
   telemetryHistory: TelemetrySample[];
   setCurrentTelemetry: (sample: TelemetrySample) => void;
   appendTelemetryHistory: (sample: TelemetrySample) => void;
 
-  // Historical Sessions & Laps
-  activeSession: SessionMetadata;
-  availableLaps: LapSummary[];
-  setActiveSession: (session: SessionMetadata) => void;
-  setAvailableLaps: (laps: LapSummary[]) => void;
-
-  // Live / Diagnostics
+  // Live Collector / Diagnostics
   diagnostics: PacketDiagnosticMetrics;
   setDiagnostics: (d: Partial<PacketDiagnosticMetrics>) => void;
   wsConnected: boolean;
@@ -85,118 +113,114 @@ interface ApexAppState {
   tickSimulation: (dt: number) => void;
 }
 
-// Default to Singapore Marina Bay Street Circuit (Formula Telemetry reference)
+// Default to Singapore Marina Bay Street Circuit
 const initialCircuit = generateSingaporeCircuit();
 const defaultSimulator = new VehicleSimulator(initialCircuit);
 
-const initialTelemetry: TelemetrySample = {
-  timestamp: 0,
-  distanceMeters: 0,
-  speedKph: 245,
-  throttlePercent: 100,
-  brakePercent: 0,
-  gear: 6,
-  rpm: 11800,
-  drs: 1,
-  steeringAngleDeg: 0,
-  longitudinalG: 0.65,
-  lateralG: 0.05,
-  worldX: initialCircuit.waypoints[0].x,
-  worldY: initialCircuit.waypoints[0].y,
-  worldZ: initialCircuit.waypoints[0].z,
-  heading: initialCircuit.waypoints[0].heading,
-};
+function buildGridDrivers(circuit: GeneratedCircuit): DriverState[] {
+  const circuitLen = circuit.lengthMeters;
+  const roster: Array<{
+    num: number;
+    code: string;
+    name: string;
+    team: string;
+    color: string;
+    compound: 'SOFT' | 'MEDIUM' | 'HARD' | 'INTER' | 'WET';
+  }> = [
+    { num: 1, code: 'VER', name: 'Max Verstappen', team: 'Red Bull Racing', color: '#1E40AF', compound: 'MEDIUM' },
+    { num: 4, code: 'NOR', name: 'Lando Norris', team: 'McLaren', color: '#EA580C', compound: 'MEDIUM' },
+    { num: 16, code: 'LEC', name: 'Charles Leclerc', team: 'Ferrari', color: '#DC2626', compound: 'HARD' },
+    { num: 81, code: 'PIA', name: 'Oscar Piastri', team: 'McLaren', color: '#EA580C', compound: 'HARD' },
+    { num: 44, code: 'HAM', name: 'Lewis Hamilton', team: 'Mercedes-AMG', color: '#0D9488', compound: 'HARD' },
+    { num: 63, code: 'RUS', name: 'George Russell', team: 'Mercedes-AMG', color: '#14B8A6', compound: 'MEDIUM' },
+    { num: 55, code: 'SAI', name: 'Carlos Sainz', team: 'Ferrari', color: '#E11D48', compound: 'MEDIUM' },
+    { num: 11, code: 'PER', name: 'Sergio Perez', team: 'Red Bull Racing', color: '#1D4ED8', compound: 'HARD' },
+    { num: 14, code: 'ALO', name: 'Fernando Alonso', team: 'Aston Martin', color: '#047857', compound: 'MEDIUM' },
+    { num: 27, code: 'HUL', name: 'Nico Hulkenberg', team: 'Haas F1', color: '#64748B', compound: 'HARD' },
+  ];
 
-const defaultDrivers: DriverState[] = [
-  {
-    driverNumber: 1,
-    code: 'VER',
-    name: 'Max Verstappen',
-    team: 'Red Bull Racing',
-    color: '#3671C6',
-    currentPosition: 1,
-    lapNumber: 18,
-    lapProgress: 0.72,
-    telemetry: initialTelemetry,
-    lastLapTime: 91.415,
-    bestLapTime: 90.842,
-    gapToLeader: 'LEADER',
-    interval: '-',
-    stintLaps: 18,
-    tyreCompound: 'MEDIUM',
-    visible: true,
-  },
-  {
-    driverNumber: 4,
-    code: 'NOR',
-    name: 'Lando Norris',
-    team: 'McLaren',
-    color: '#FF8000',
-    currentPosition: 2,
-    lapNumber: 18,
-    lapProgress: 0.68,
-    telemetry: { ...initialTelemetry, speedKph: 242 },
-    lastLapTime: 91.684,
-    bestLapTime: 91.118,
-    gapToLeader: '+1.428s',
-    interval: '+1.428s',
-    stintLaps: 18,
-    tyreCompound: 'MEDIUM',
-    visible: true,
-  },
-  {
-    driverNumber: 16,
-    code: 'LEC',
-    name: 'Charles Leclerc',
-    team: 'Ferrari',
-    color: '#E8002D',
-    currentPosition: 3,
-    lapNumber: 18,
-    lapProgress: 0.62,
-    telemetry: { ...initialTelemetry, speedKph: 238 },
-    lastLapTime: 91.910,
-    bestLapTime: 91.355,
-    gapToLeader: '+3.890s',
-    interval: '+2.462s',
-    stintLaps: 18,
-    tyreCompound: 'HARD',
-    visible: true,
-  },
-  {
-    driverNumber: 44,
-    code: 'HAM',
-    name: 'Lewis Hamilton',
-    team: 'Mercedes-AMG',
-    color: '#6CD3BF',
-    currentPosition: 4,
-    lapNumber: 18,
-    lapProgress: 0.58,
-    telemetry: { ...initialTelemetry, speedKph: 236 },
-    lastLapTime: 92.120,
-    bestLapTime: 91.490,
-    gapToLeader: '+5.712s',
-    interval: '+1.822s',
-    stintLaps: 18,
-    tyreCompound: 'HARD',
-    visible: true,
-  },
-];
+  return roster.map((item, index) => {
+    // 32 meters between consecutive grid slots, alternating left and right lanes
+    const dist = (circuitLen - index * 32) % circuitLen;
+    const wpIdx = Math.floor((dist / circuitLen) * circuit.waypoints.length) % circuit.waypoints.length;
+    const wp = circuit.waypoints[wpIdx] || circuit.waypoints[0];
+
+    const laneOffset = index % 2 === 0 ? 1.7 : -1.7;
+    const nx = -Math.cos(wp.heading);
+    const nz = Math.sin(wp.heading);
+
+    const gear =
+      wp.speedLimitKph < 100
+        ? 2
+        : wp.speedLimitKph < 150
+        ? 3
+        : wp.speedLimitKph < 200
+        ? 4
+        : wp.speedLimitKph < 250
+        ? 5
+        : wp.speedLimitKph < 290
+        ? 6
+        : wp.speedLimitKph < 320
+        ? 7
+        : 8;
+
+    return {
+      driverNumber: item.num,
+      code: item.code,
+      name: item.name,
+      team: item.team,
+      color: item.color,
+      currentPosition: index + 1,
+      lapNumber: 18,
+      lapProgress: dist / circuitLen,
+      telemetry: {
+        timestamp: 0,
+        distanceMeters: dist,
+        speedKph: wp.speedLimitKph * (0.98 - index * 0.003),
+        throttlePercent: index === 0 ? 100 : 92,
+        brakePercent: 0,
+        gear,
+        rpm: 10800 + index * 80,
+        drs: 0,
+        steeringAngleDeg: 0,
+        longitudinalG: 0.5,
+        lateralG: 0.05,
+        worldX: wp.x + nx * laneOffset,
+        worldY: wp.y,
+        worldZ: wp.z + nz * laneOffset,
+        heading: wp.heading,
+      },
+      lastLapTime: 91.4 + index * 0.28,
+      bestLapTime: 90.8 + index * 0.24,
+      gapToLeader: index === 0 ? 'LEADER' : `+${(index * 1.35).toFixed(3)}s`,
+      interval: index === 0 ? '-' : `+1.350s`,
+      stintLaps: 18,
+      tyreCompound: item.compound,
+      visible: true,
+    };
+  });
+}
+
+const defaultDrivers = buildGridDrivers(initialCircuit);
+const initialTelemetry = defaultDrivers[0].telemetry;
 
 const defaultSession: SessionMetadata = {
   id: 'singapore-marina-bay-gp',
   sessionKey: 9620,
-  meetingName: 'Singapore Grand Prix 2026',
+  meetingKey: 1245,
+  meetingName: 'Singapore Grand Prix 2024',
   circuitName: 'Marina Bay Street Circuit',
   country: 'Singapore',
-  year: 2026,
+  year: 2024,
   sessionType: 'Race',
-  date: '2026-09-20',
+  date: '2024-09-22',
   totalLaps: 62,
   trackLengthMeters: initialCircuit.lengthMeters,
   dataMode: DATA_MODES.SYNTHETIC,
-  availableDrivers: [1, 4, 16, 44],
+  availableDrivers: [1, 4, 16, 81, 44],
   hasCoordinateStream: true,
   hasHighFrequencyTelemetry: true,
+  circuitPassport: VERIFIED_CIRCUITS.singapore,
 };
 
 const precomputedLap = defaultSimulator.generateFullLap(15);
@@ -220,6 +244,104 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
   dataMode: DATA_MODES.SYNTHETIC,
   setDataMode: (mode) => set({ dataMode: mode }),
 
+  selectedYear: 2024,
+  setSelectedYear: (selectedYear) => set({ selectedYear }),
+  selectedMeetingKey: 1245,
+  setSelectedMeetingKey: (selectedMeetingKey) => set({ selectedMeetingKey }),
+  activeSession: defaultSession,
+  setActiveSession: (activeSession) => set({ activeSession }),
+
+  selectedDriverNumber: 1,
+  setSelectedDriverNumber: (num) => set({ selectedDriverNumber: num }),
+  comparisonDriverNumber: 4,
+  setComparisonDriverNumber: (num) => set({ comparisonDriverNumber: num }),
+  selectedLapNumber: 15,
+  setSelectedLapNumber: (selectedLapNumber) => set({ selectedLapNumber }),
+  comparisonLapNumber: 15,
+  setComparisonLapNumber: (comparisonLapNumber) => set({ comparisonLapNumber }),
+
+  loadHistoricalSession: async (session: SessionMetadata) => {
+    set({
+      activeSession: session,
+      dataMode: DATA_MODES.HISTORICAL,
+      selectedMeetingKey: session.meetingKey || null,
+      selectedYear: session.year,
+    });
+
+    // Match circuit
+    const cName = (session.circuitName || '').toLowerCase();
+    if (cName.includes('austin') || cName.includes('americas')) {
+      get().switchCircuit('austin');
+    } else if (cName.includes('singapore') || cName.includes('marina')) {
+      get().switchCircuit('singapore');
+    } else if (cName.includes('silverstone')) {
+      get().switchCircuit('silverstone');
+    } else if (cName.includes('spa')) {
+      get().switchCircuit('spa');
+    } else if (cName.includes('monza')) {
+      get().switchCircuit('monza');
+    }
+
+    try {
+      const [drivers, laps, pitStops, stints] = await Promise.all([
+        fetchSessionDrivers(session.sessionKey),
+        fetchSessionLaps(session.sessionKey),
+        fetchSessionPitStops(session.sessionKey),
+        fetchSessionStints(session.sessionKey),
+      ]);
+
+      set((state) => {
+        // Convert to driver state list with distinct positions along circuit
+        const circuitLen = state.circuit.lengthMeters;
+        const mappedDrivers: DriverState[] = drivers.slice(0, 10).map((d, index) => {
+          const distanceOffset = (circuitLen - index * 120) % circuitLen;
+          const wpIdx = Math.floor((distanceOffset / circuitLen) * state.circuit.waypoints.length) % state.circuit.waypoints.length;
+          const wp = state.circuit.waypoints[wpIdx] || state.circuit.waypoints[0];
+
+          return {
+            driverNumber: d.driverNumber,
+            code: d.nameAcronym,
+            name: d.fullName,
+            team: d.teamName,
+            color: d.teamColour,
+            currentPosition: index + 1,
+            lapNumber: 1,
+            lapProgress: distanceOffset / circuitLen,
+            telemetry: {
+              ...initialTelemetry,
+              distanceMeters: distanceOffset,
+              worldX: wp.x,
+              worldY: wp.y,
+              worldZ: wp.z,
+              heading: wp.heading,
+              speedKph: wp.speedLimitKph,
+            },
+            lastLapTime: null,
+            bestLapTime: null,
+            gapToLeader: index === 0 ? 'LEADER' : `+${(index * 1.4).toFixed(3)}s`,
+            interval: index === 0 ? '-' : `+1.400s`,
+            stintLaps: 1,
+            tyreCompound: 'MEDIUM',
+            visible: true,
+            headshotUrl: d.headshotUrl,
+          };
+        });
+
+        return {
+          sessionDrivers: drivers,
+          availableLaps: laps,
+          sessionPitStops: pitStops,
+          sessionStints: stints,
+          drivers: mappedDrivers.length > 0 ? mappedDrivers : state.drivers,
+          selectedDriverNumber: mappedDrivers[0]?.driverNumber || state.selectedDriverNumber,
+          comparisonDriverNumber: mappedDrivers[1]?.driverNumber || null,
+        };
+      });
+    } catch (err) {
+      console.warn('[store] loadHistoricalSession error:', err);
+    }
+  },
+
   circuit: initialCircuit,
   simulator: defaultSimulator,
   isSimulating: true,
@@ -236,12 +358,12 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
     const { simulator } = get();
     simulator.setCircuit(newCircuit);
 
-    // Compute expected duration (m / ~60 m/s avg speed)
     const expectedDuration = Math.round((newCircuit.lengthMeters / 55) * 10) / 10;
     const newLapHistory = simulator.generateFullLap(15);
     simulator.reset(120);
 
     const firstSample = newLapHistory[0] || initialTelemetry;
+    const newDrivers = buildGridDrivers(newCircuit);
 
     set((state) => ({
       circuit: newCircuit,
@@ -249,6 +371,7 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
       currentTime: 0,
       currentTelemetry: firstSample,
       telemetryHistory: newLapHistory,
+      drivers: newDrivers,
       activeSession: {
         ...state.activeSession,
         circuitName: newCircuit.name,
@@ -272,7 +395,6 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
   setIsPlaying: (isPlaying) => set({ isPlaying }),
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
 
-  // Deterministic seeking: update both logical clock, simulator state, and vehicle position immediately!
   setCurrentTime: (currentTime) => {
     const { simulator, duration, circuit } = get();
     const boundedTime = Math.max(0, Math.min(duration, currentTime));
@@ -334,34 +456,31 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
     set({ currentTime: 0, currentTelemetry: sample, isPlaying: true });
   },
 
-  selectedDriverNumber: 1,
-  setSelectedDriverNumber: (num) => set({ selectedDriverNumber: num }),
   drivers: defaultDrivers,
   setDrivers: (drivers) => set({ drivers }),
-  toggleDriverVisibility: (driverNumber) => set((state) => ({
-    drivers: state.drivers.map((d) =>
-      d.driverNumber === driverNumber ? { ...d, visible: !d.visible } : d
-    ),
-  })),
+  toggleDriverVisibility: (driverNumber) =>
+    set((state) => ({
+      drivers: state.drivers.map((d) =>
+        d.driverNumber === driverNumber ? { ...d, visible: !d.visible } : d
+      ),
+    })),
+
+  sessionDrivers: [],
+  availableLaps: [],
+  setAvailableLaps: (availableLaps) => set({ availableLaps }),
+  sessionPitStops: [],
+  sessionStints: [],
+  driverLocations: {},
 
   currentTelemetry: initialTelemetry,
   telemetryHistory: precomputedLap,
   setCurrentTelemetry: (sample) => set({ currentTelemetry: sample }),
-  appendTelemetryHistory: (sample) => set((state) => {
-    const history = [...state.telemetryHistory, sample];
-    if (history.length > 3000) history.shift();
-    return { telemetryHistory: history };
-  }),
-
-  activeSession: defaultSession,
-  availableLaps: [
-    { lapNumber: 1, driverNumber: 1, lapTimeSeconds: 93.812, sector1Seconds: 29.512, sector2Seconds: 34.401, sector3Seconds: 29.899, valid: true, isPersonalBest: false, isSessionBest: false, tyreCompound: 'MEDIUM' },
-    { lapNumber: 2, driverNumber: 1, lapTimeSeconds: 92.115, sector1Seconds: 29.102, sector2Seconds: 33.910, sector3Seconds: 29.103, valid: true, isPersonalBest: false, isSessionBest: false, tyreCompound: 'MEDIUM' },
-    { lapNumber: 3, driverNumber: 1, lapTimeSeconds: 91.415, sector1Seconds: 28.890, sector2Seconds: 33.512, sector3Seconds: 29.013, valid: true, isPersonalBest: false, isSessionBest: false, tyreCompound: 'MEDIUM' },
-    { lapNumber: 4, driverNumber: 1, lapTimeSeconds: 90.842, sector1Seconds: 28.711, sector2Seconds: 33.250, sector3Seconds: 28.881, valid: true, isPersonalBest: true, isSessionBest: true, tyreCompound: 'MEDIUM' },
-  ],
-  setActiveSession: (activeSession) => set({ activeSession }),
-  setAvailableLaps: (availableLaps) => set({ availableLaps }),
+  appendTelemetryHistory: (sample) =>
+    set((state) => {
+      const updated = [...state.telemetryHistory, sample];
+      if (updated.length > 500) updated.shift();
+      return { telemetryHistory: updated };
+    }),
 
   diagnostics: {
     receiverState: 'listening',
@@ -383,7 +502,7 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
   setWsConnected: (wsConnected) => set({ wsConnected }),
 
   tickSimulation: (dt) => {
-    const { simulator, manualControl, manualThrottle, manualBrake, playbackSpeed, isPlaying } = get();
+    const { simulator, manualControl, manualThrottle, manualBrake, playbackSpeed, isPlaying, circuit } = get();
     if (!isPlaying) return;
 
     const effectiveDt = dt * playbackSpeed;
@@ -396,16 +515,42 @@ export const useApexStore = create<ApexAppState>((set, get) => ({
     set((state) => {
       const newTime = state.currentTime + effectiveDt;
       const boundedTime = newTime % state.duration;
+      const circuitLen = circuit.lengthMeters;
 
-      const updatedDrivers = state.drivers.map((drv) => {
+      // Update all drivers deterministically along their own positions with zero overlap
+      const updatedDrivers = state.drivers.map((drv, index) => {
         if (drv.driverNumber === state.selectedDriverNumber) {
           return {
             ...drv,
             telemetry: sample,
-            lapProgress: sample.distanceMeters / state.circuit.lengthMeters,
+            lapProgress: sample.distanceMeters / circuitLen,
           };
         }
-        return drv;
+
+        // Each competitor car advances at their relative pace along the track with dedicated lateral lanes
+        // Guaranteed spacing buffer so cars never overlap or bunch up
+        const driverOffset = (sample.distanceMeters - (index + 1) * 36 + circuitLen) % circuitLen;
+        const wpIdx = Math.floor((driverOffset / circuitLen) * circuit.waypoints.length) % circuit.waypoints.length;
+        const wp = circuit.waypoints[wpIdx] || circuit.waypoints[0];
+
+        // Alternate lateral lane displacement: even drivers stay right (+1.7m), odd drivers stay left (-1.7m)
+        const laneOffset = index % 2 === 0 ? 1.7 : -1.7;
+        const nx = -Math.cos(wp.heading);
+        const nz = Math.sin(wp.heading);
+
+        return {
+          ...drv,
+          lapProgress: driverOffset / circuitLen,
+          telemetry: {
+            ...drv.telemetry,
+            distanceMeters: driverOffset,
+            speedKph: wp.speedLimitKph * (0.98 - index * 0.003),
+            worldX: wp.x + nx * laneOffset,
+            worldY: wp.y,
+            worldZ: wp.z + nz * laneOffset,
+            heading: wp.heading,
+          },
+        };
       });
 
       return {

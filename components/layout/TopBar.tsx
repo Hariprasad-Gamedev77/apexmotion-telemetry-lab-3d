@@ -1,7 +1,7 @@
 'use client';
 
-// APEX TELEMETRY 3D — Engineering Header & Operating Mode Switcher (Light Theme)
-// High-contrast, crystal-clear typography, and functional mode switching.
+// APEX TELEMETRY 3D — Engineering Header & Operating Mode Switcher
+// High-contrast, motorsport daylight theme (#FFFFFF / #E2E8F0 / #0284C7 / #0F172A)
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -17,7 +17,7 @@ export function TopBar() {
   const handleModeSwitch = (mode: DataMode) => {
     setDataMode(mode);
     if (mode === DATA_MODES.SYNTHETIC) {
-      switchCircuit('singapore');
+      switchCircuit('austin');
       if (pathname !== '/dashboard') router.push('/dashboard');
     } else if (mode === DATA_MODES.HISTORICAL) {
       if (pathname !== '/historical' && pathname !== '/dashboard') {
@@ -31,94 +31,94 @@ export function TopBar() {
   };
 
   return (
-    <header className="h-14 bg-white border-b border-slate-200 px-4 flex items-center justify-between select-none z-30 shadow-xs">
+    <header className="h-14 bg-white border-b border-[#E2E8F0] px-4 flex items-center justify-between select-none z-30 shadow-xs">
       {/* Left: Mode Selector Tabs & Persistent Badge */}
       <div className="flex items-center gap-3">
-        {/* Operating Mode Buttons with high contrast and clear purpose */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-xs">
+        {/* Operating Mode Buttons */}
+        <div className="flex items-center bg-[#F1F5F9] p-1 rounded-xl border border-[#E2E8F0]">
           <button
             onClick={() => handleModeSwitch(DATA_MODES.SYNTHETIC)}
-            title="Switch to Procedural 3D Physics Simulation (No API/Game needed)"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all active:scale-95 ${
+            title="Switch to Procedural 3D Physics Simulation"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all active:scale-95 ${
               dataMode === DATA_MODES.SYNTHETIC
-                ? 'bg-white text-sky-700 border border-sky-300 shadow-xs'
-                : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/60'
+                ? 'bg-white text-[#0284C7] border border-[#0284C7]/30 shadow-xs'
+                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-white/60'
             }`}
           >
-            <Sparkles size={13} className={dataMode === DATA_MODES.SYNTHETIC ? 'text-sky-600' : 'text-slate-600'} />
+            <Sparkles size={13} className={dataMode === DATA_MODES.SYNTHETIC ? 'text-[#0284C7]' : 'text-[#64748B]'} />
             <span>Synthetic 3D</span>
           </button>
 
           <button
             onClick={() => handleModeSwitch(DATA_MODES.HISTORICAL)}
             title="Browse and replay historical Formula 1 GPS & Telemetry"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all active:scale-95 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all active:scale-95 ${
               dataMode === DATA_MODES.HISTORICAL
-                ? 'bg-white text-amber-800 border border-amber-300 shadow-xs'
-                : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/60'
+                ? 'bg-white text-[#D97706] border border-[#D97706]/30 shadow-xs'
+                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-white/60'
             }`}
           >
-            <Database size={13} className={dataMode === DATA_MODES.HISTORICAL ? 'text-amber-600' : 'text-slate-600'} />
+            <Database size={13} className={dataMode === DATA_MODES.HISTORICAL ? 'text-[#D97706]' : 'text-[#64748B]'} />
             <span>Historical F1</span>
           </button>
 
           <button
             onClick={() => handleModeSwitch(DATA_MODES.LIVE)}
             title="Connect local Python UDP telemetry receiver (Port 20777)"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all active:scale-95 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all active:scale-95 ${
               dataMode === DATA_MODES.LIVE
-                ? 'bg-white text-emerald-800 border border-emerald-300 shadow-xs'
-                : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/60'
+                ? 'bg-white text-[#059669] border border-[#059669]/30 shadow-xs'
+                : 'text-[#64748B] hover:text-[#0F172A] hover:bg-white/60'
             }`}
           >
-            <Wifi size={13} className={dataMode === DATA_MODES.LIVE ? 'text-emerald-600' : 'text-slate-600'} />
+            <Wifi size={13} className={dataMode === DATA_MODES.LIVE ? 'text-[#059669]' : 'text-[#64748B]'} />
             <span>Live Sim</span>
           </button>
         </div>
 
         {/* Persistent Mode Status Badge */}
         {dataMode === DATA_MODES.SYNTHETIC && (
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 border border-sky-300 text-sky-800 text-[10px] font-mono font-extrabold tracking-wider shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] text-[10px] font-mono font-bold tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
             SYNTHETIC DEMO
           </div>
         )}
         {dataMode === DATA_MODES.HISTORICAL && (
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-800 text-[10px] font-mono font-extrabold tracking-wider shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEF3C7] border border-[#FDE68A] text-[#B45309] text-[10px] font-mono font-bold tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#D97706]" />
             HISTORICAL RECORD
           </div>
         )}
         {dataMode === DATA_MODES.LIVE && (
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-[10px] font-mono font-extrabold tracking-wider shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D1FAE5] border border-[#A7F3D0] text-[#047857] text-[10px] font-mono font-bold tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-[#059669] animate-ping" />
             LIVE TELEMETRY
           </div>
         )}
       </div>
 
       {/* Center: Selected Session & Track Pill */}
-      <div className="hidden lg:flex items-center gap-2 bg-slate-50 px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-mono shadow-xs">
-        <MapPin size={13} className="text-sky-600" />
-        <span className="text-slate-500 uppercase tracking-wider text-[10px] font-bold">CIRCUIT:</span>
-        <span className="text-slate-900 font-black">{activeSession.circuitName}</span>
-        <span className="text-slate-300">•</span>
-        <span className="text-sky-700 font-extrabold">{activeSession.year}</span>
+      <div className="hidden lg:flex items-center gap-2 bg-[#F8FAFC] px-3.5 py-1.5 rounded-xl border border-[#E2E8F0] text-xs font-mono">
+        <MapPin size={13} className="text-[#0284C7]" />
+        <span className="text-[#64748B] uppercase tracking-wider text-[10px] font-bold">CIRCUIT:</span>
+        <span className="text-[#0F172A] font-bold">{activeSession.circuitName}</span>
+        <span className="text-[#CBD5E1]">•</span>
+        <span className="text-[#0284C7] font-bold">{activeSession.year}</span>
       </div>
 
       {/* Right: Connection & Status Pill */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 text-xs font-mono bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-2 text-xs font-mono bg-[#F8FAFC] px-3 py-1.5 rounded-xl border border-[#E2E8F0]">
           <span
-            className={`w-2.5 h-2.5 rounded-full ${
+            className={`w-2 h-2 rounded-full ${
               dataMode === DATA_MODES.SYNTHETIC
-                ? 'bg-sky-500'
+                ? 'bg-[#0284C7]'
                 : wsConnected
-                ? 'bg-emerald-500'
-                : 'bg-amber-500'
+                ? 'bg-[#10B981]'
+                : 'bg-[#F59E0B]'
             }`}
           />
-          <span className="text-[11px] font-extrabold text-slate-800">
+          <span className="text-[11px] font-bold text-[#0F172A]">
             {dataMode === DATA_MODES.SYNTHETIC
               ? 'SIM ENGINE ACTIVE'
               : wsConnected
@@ -132,4 +132,3 @@ export function TopBar() {
 }
 
 export default TopBar;
-

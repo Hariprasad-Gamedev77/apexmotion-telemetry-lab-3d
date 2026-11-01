@@ -19,10 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className="flex h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A]">
-        {/* Collapsible Clean Light Sidebar */}
+        {/* Navigation Sidebar */}
         <Sidebar />
 
-        {/* Main Content Area */}
+        {/* Main Application Content Area */}
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#F8FAFC]">
           <TopBar />
           <main className="flex-1 min-w-0 overflow-y-auto bg-[#F8FAFC] text-[#0F172A]">

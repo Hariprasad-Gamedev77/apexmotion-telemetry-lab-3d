@@ -1,7 +1,8 @@
 // APEX TELEMETRY 3D — Multi-Circuit Procedural Track Generator & Spline Geometry
-// Supports Singapore Marina Bay, Silverstone, Spa-Francorchamps, Monza, and Apex International Raceway.
+// Supports all 24 official Formula 1 calendar circuits and Apex International Raceway.
 
 import type { TrackWaypoint, TrackTurn, TrackDrsZone } from '../types';
+import { VERIFIED_CIRCUITS } from '../circuits/registry';
 
 export interface GeneratedCircuit {
   id: string;
@@ -200,6 +201,53 @@ function buildCircuitFromControlPoints(
       normal: [Math.cos(waypoints[0].heading), 0, -Math.sin(waypoints[0].heading)],
     },
   };
+}
+
+/**
+ * 0. Circuit of The Americas - Austin (5,513m, 20 Turns)
+ * Reference: https://formula-telemetry.com/sessions/2026/austin/race?tab=track-visualization
+ */
+export function generateAustinCircuit(): GeneratedCircuit {
+  const anchors: ControlPointDef[] = [
+    { x: 0, y: 0, z: 0 },
+    { x: 280, y: 35, z: 20, turn: { number: 1, name: 'Big Red (T1)', apexSpeedKph: 85, gear: 2 } },
+    { x: 420, y: 22, z: 120, turn: { number: 2, name: 'T2', apexSpeedKph: 240, gear: 6 } },
+    { x: 520, y: 15, z: 240, turn: { number: 3, name: 'Esses T3', apexSpeedKph: 260, gear: 7 } },
+    { x: 480, y: 8, z: 380, turn: { number: 4, name: 'Esses T4', apexSpeedKph: 245, gear: 6 } },
+    { x: 380, y: 4, z: 490, turn: { number: 5, name: 'Esses T5', apexSpeedKph: 225, gear: 5 } },
+    { x: 260, y: 2, z: 580, turn: { number: 6, name: 'T6', apexSpeedKph: 210, gear: 5 } },
+    { x: 140, y: 0, z: 620, turn: { number: 7, name: 'T7', apexSpeedKph: 190, gear: 4 } },
+    { x: 20, y: 0, z: 660, turn: { number: 8, name: 'T8', apexSpeedKph: 165, gear: 4 } },
+    { x: -110, y: 0, z: 710, turn: { number: 9, name: 'T9', apexSpeedKph: 140, gear: 3 } },
+    { x: -240, y: 4, z: 750, turn: { number: 10, name: 'T10', apexSpeedKph: 220, gear: 5 } },
+    { x: -380, y: 2, z: 820, turn: { number: 11, name: 'Hairpin (T11)', apexSpeedKph: 75, gear: 2 } },
+    { x: -460, y: -2, z: 420 }, // 1.2km Back Straight (DRS 2)
+    { x: -540, y: -6, z: 20 },
+    { x: -620, y: -8, z: -380 },
+    { x: -680, y: -10, z: -780, turn: { number: 12, name: 'T12', apexSpeedKph: 88, gear: 2 } },
+    { x: -580, y: -6, z: -850, turn: { number: 13, name: 'T13', apexSpeedKph: 125, gear: 3 } },
+    { x: -480, y: -4, z: -880, turn: { number: 14, name: 'T14', apexSpeedKph: 140, gear: 4 } },
+    { x: -380, y: -2, z: -850, turn: { number: 15, name: 'T15', apexSpeedKph: 110, gear: 3 } },
+    { x: -260, y: 0, z: -760, turn: { number: 16, name: 'Stadium T16', apexSpeedKph: 205, gear: 5 } },
+    { x: -160, y: 0, z: -620, turn: { number: 17, name: 'Stadium T17', apexSpeedKph: 215, gear: 5 } },
+    { x: -100, y: 0, z: -480, turn: { number: 18, name: 'Stadium T18', apexSpeedKph: 225, gear: 6 } },
+    { x: -80, y: 0, z: -300, turn: { number: 19, name: 'T19', apexSpeedKph: 175, gear: 4 } },
+    { x: -50, y: 0, z: -120, turn: { number: 20, name: 'T20', apexSpeedKph: 135, gear: 3 } },
+  ];
+
+  const drsZones: TrackDrsZone[] = [
+    { number: 1, name: 'Main Pit Straight DRS', startDistance: 250, endDistance: 480 },
+    { number: 2, name: 'Long Back Straight DRS', startDistance: 3000, endDistance: 4000 },
+  ];
+
+  return buildCircuitFromControlPoints(
+    'austin',
+    'Circuit of The Americas',
+    'United States',
+    anchors,
+    580,
+    drsZones
+  );
 }
 
 /**
@@ -411,10 +459,66 @@ export function generateSyntheticCircuit(pointCount: number = 600): GeneratedCir
   );
 }
 
+/**
+ * Builds a deterministic closed-loop 3D circuit from a verified circuit data passport
+ */
+export function generateCircuitFromPassport(circuitId: string, pointCount: number = 600): GeneratedCircuit {
+  const record = VERIFIED_CIRCUITS[circuitId] || VERIFIED_CIRCUITS.austin;
+  const controlPoints: ControlPointDef[] = record.centerlineAnchors.map((anchor) => ({
+    x: anchor.x,
+    y: anchor.y,
+    z: anchor.z,
+    turn: anchor.turn
+      ? {
+          number: anchor.turn.number,
+          name: anchor.turn.name,
+          apexSpeedKph: anchor.turn.apexSpeedKph,
+          gear: anchor.turn.gear,
+        }
+      : undefined,
+  }));
+
+  const drsZones: TrackDrsZone[] = record.drsZones.map((d) => ({
+    number: d.number,
+    name: d.name,
+    startDistance: d.startDistance,
+    endDistance: d.endDistance,
+  }));
+
+  return buildCircuitFromControlPoints(
+    record.circuitId,
+    record.officialName,
+    record.country,
+    controlPoints,
+    pointCount,
+    drsZones
+  );
+}
+
 export const CIRCUITS_REGISTRY: Record<string, () => GeneratedCircuit> = {
-  singapore: generateSingaporeCircuit,
+  bahrain: () => generateCircuitFromPassport('bahrain'),
+  jeddah: () => generateCircuitFromPassport('jeddah'),
+  melbourne: () => generateCircuitFromPassport('melbourne'),
+  suzuka: () => generateCircuitFromPassport('suzuka'),
+  shanghai: () => generateCircuitFromPassport('shanghai'),
+  miami: () => generateCircuitFromPassport('miami'),
+  imola: () => generateCircuitFromPassport('imola'),
+  monaco: () => generateCircuitFromPassport('monaco'),
+  montreal: () => generateCircuitFromPassport('montreal'),
+  barcelona: () => generateCircuitFromPassport('barcelona'),
+  spielberg: () => generateCircuitFromPassport('spielberg'),
   silverstone: generateSilverstoneCircuit,
+  hungaroring: () => generateCircuitFromPassport('hungaroring'),
   spa: generateSpaCircuit,
+  zandvoort: () => generateCircuitFromPassport('zandvoort'),
   monza: generateMonzaCircuit,
+  baku: () => generateCircuitFromPassport('baku'),
+  singapore: generateSingaporeCircuit,
+  austin: generateAustinCircuit,
+  mexico: () => generateCircuitFromPassport('mexico'),
+  interlagos: () => generateCircuitFromPassport('interlagos'),
+  lasvegas: () => generateCircuitFromPassport('lasvegas'),
+  lusail: () => generateCircuitFromPassport('lusail'),
+  yasmarina: () => generateCircuitFromPassport('yasmarina'),
   apex: generateSyntheticCircuit,
 };
